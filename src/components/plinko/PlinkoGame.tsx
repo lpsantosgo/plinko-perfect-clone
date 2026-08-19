@@ -154,7 +154,7 @@ export function PlinkoGame() {
 
   return (
     <div className="plinko-stage relative mx-auto flex min-h-screen w-full max-w-[520px] flex-col overflow-hidden text-slate-100 select-none">
-      <TopBar clock={clock} audioEnabled={audioEnabled} setAudioEnabled={setAudioEnabled} />
+      <TopBar clock={clock} audioEnabled={audioEnabled} setAudioEnabled={setAudioEnabled} onReset={resetGame} />
 
       <div className="relative flex-1 px-2">
         <div className="plinko-logo pointer-events-none absolute top-16 left-4 rotate-[-8deg] whitespace-pre-wrap text-[10px] leading-tight font-bold opacity-0">
@@ -295,10 +295,12 @@ function TopBar({
   clock,
   audioEnabled,
   setAudioEnabled,
+  onReset,
 }: {
   clock: string;
   audioEnabled: boolean;
   setAudioEnabled: (v: boolean) => void;
+  onReset: () => void;
 }) {
   const Circle = ({ children }: { children: React.ReactNode }) => (
     <span className="grid h-11 w-11 place-items-center rounded-full border-2 border-slate-100/70 text-slate-100/90">
@@ -308,7 +310,7 @@ function TopBar({
   return (
     <header className="flex items-center gap-3 px-3 pt-3">
       <Circle>
-        <button onClick={resetGame} className="w-full h-full flex items-center justify-center focus:outline-none" title="Reiniciar">
+        <button onClick={onReset} className="w-full h-full flex items-center justify-center focus:outline-none" title="Reiniciar">
           <Home className="h-5 w-5" />
         </button>
       </Circle>
