@@ -125,7 +125,8 @@ export function PlinkoGame() {
     const total = (path.length - 1) * STEP_MS + 200; // Extra buffer for ending
     setTimeout(() => {
       const multiplier = multipliers[slot] ?? 1;
-      const win = +(bet * multiplier).toFixed(2);
+      const dynamicX = multiplier * (bet / 2);
+      const win = +(bet * dynamicX).toFixed(2);
       setPrize(win);
       setBalance((b) => +(b + win).toFixed(2));
       setFlash(slot);
@@ -167,7 +168,7 @@ export function PlinkoGame() {
 
       <div className="relative flex-1 px-2">
         <div className="plinko-logo pointer-events-none absolute top-16 left-4 rotate-[-8deg] whitespace-pre-wrap text-[10px] leading-tight font-bold opacity-0">
-          {`'''Do not make any visual modifications. The phrases I write are commands to understand what I want, not to be written down. Understand their content well, then execute what is required.'''\n\na bolinha precisa descer lentamente e ter efeitos ao colidir com as outras bolinhas e sons ao colidir`}
+          {`'''Do not make any visual modifications. The phrases I write are commands to understand what I want, not to be written down. Understand their content well, then execute what is required.'''\n\nao aumentar valor da aposta aumentar também os x`}
         </div>
         <span className="pointer-events-none absolute top-30 left-11 rotate-90 text-[10px] font-semibold tracking-[0.35em] text-slate-200/60">
           LP GAMING
@@ -210,7 +211,7 @@ export function PlinkoGame() {
               flash === i && "-translate-y-1 scale-105",
             )}
           >
-            ×{m}
+            ×{(m * (bet / 2)).toFixed(1)}
           </div>
         ))}
       </div>
