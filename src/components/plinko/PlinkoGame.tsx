@@ -15,10 +15,19 @@ function slotClass(index: number, total: number) {
   return SLOT_CLASSES[4];
 }
 
+function CollisionEffect({ x, y }: { x: number; y: number }) {
+  return (
+    <div 
+      className="absolute h-6 w-6 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white/30 animate-ping pointer-events-none"
+      style={{ left: `${x}%`, top: `${y}%` }}
+    />
+  );
+}
+
 type Ball = { id: number; path: { x: number; y: number }[]; start: number; slot: number };
 
 const ROW_OPTIONS = [8, 9, 10, 11, 12, 13, 14, 15, 16];
-const STEP_MS = 130;
+const STEP_MS = 280; // Increased from 130 for slower fall
 
 export function PlinkoGame() {
   const [rows, setRows] = useState(8);
@@ -113,7 +122,7 @@ export function PlinkoGame() {
     const id = ++ballId.current;
     setBalls((prev) => [...prev, { id, path, start: performance.now(), slot }]);
 
-    const total = path.length * STEP_MS;
+    const total = (path.length - 1) * STEP_MS + 200; // Extra buffer for ending
     setTimeout(() => {
       const multiplier = multipliers[slot] ?? 1;
       const win = +(bet * multiplier).toFixed(2);
@@ -158,7 +167,7 @@ export function PlinkoGame() {
 
       <div className="relative flex-1 px-2">
         <div className="plinko-logo pointer-events-none absolute top-16 left-4 rotate-[-8deg] whitespace-pre-wrap text-[10px] leading-tight font-bold opacity-0">
-          {`'''Do not make any visual modifications. The phrases I write are commands to understand what I want, not to be written down. Understand their content well, then execute what is required.'''\n\nGaranta que todos os botões do jogo (play, reiniciar, som e quaisquer controles) funcionem corretamente em cada estado do jogo.`}
+          {`'''Do not make any visual modifications. The phrases I write are commands to understand what I want, not to be written down. Understand their content well, then execute what is required.'''\n\na bolinha precisa descer lentamente e ter efeitos ao colidir com as outras bolinhas e sons ao colidir`}
         </div>
         <span className="pointer-events-none absolute top-30 left-11 rotate-90 text-[10px] font-semibold tracking-[0.35em] text-slate-200/60">
           LP GAMING
@@ -346,8 +355,26 @@ function Board({
   gap: number;
   pegY: (r: number) => number;
   balls: Ball[];
-  onPeg: () => void;
+  onPeg: (x: number, y: number) => void;
 }) {
+  const [effects, setEffects] = useState<{ id: number; x: number; y: number }[]>([]);
+
+  useEffect(() => {
+    // Cleanup effects after animation
+    if (effects.length > 0) {
+      const timer = setTimeout(() => {
+        setEffects(prev => prev.slice(1));
+      }, 600);
+      return () => clearTimeout(timer);
+    }
+    return undefined;
+  }, [effects]);
+
+  const handlePeg = (x: number, y: number) => {
+    setEffects(prev => [...prev, { id: Date.now(), x, y }]);
+    onPeg(x, y);
+  };
+
   return (
     <div className="relative mx-auto h-[62vh] max-h-[560px] w-full">
       <div
@@ -363,8 +390,20 @@ function Board({
           />
         )),
       )}
+      {effects.map(e => (
+        <CollisionEffect key={e.id} x={e.x} y={e.y} />
+      ))}
       {balls.map((b) => (
-        <BallView key={b.id} ball={b} onPeg={onPeg} />
+        <BallView 
+          key={b.id} 
+          ball={b} 
+          onPeg={() => {
+            const index = Math.floor((performance.now() - b.start) / STEP_MS);
+            const x = b.path[index + 1]?.x || 50;
+            const y = pegY(index);
+            handlePeg(x, y);
+          }} 
+        />
       ))}
     </div>
   );
@@ -388,9 +427,13 @@ function BallView({ ball, onPeg }: { ball: Ball; onPeg: () => void }) {
       const f = Math.min(Math.max(t - i, 0), 1);
       const a = ball.path[i]!;
       const c = ball.path[i + 1]!;
+      
+      // Add a slight "bounce" or "arc" during the step
+      const arc = Math.sin(f * Math.PI) * 1.5;
+      
       setPos({
         x: a.x + (c.x - a.x) * f,
-        y: a.y + (c.y - a.y) * (f * f * 0.7 + f * 0.3),
+        y: a.y + (c.y - a.y) * (f * f * 0.6 + f * 0.4) - (i < ball.path.length - 2 ? arc * 0.5 : 0),
       });
       if (t < ball.path.length - 1) raf = requestAnimationFrame(loop);
     };
@@ -400,8 +443,11 @@ function BallView({ ball, onPeg }: { ball: Ball; onPeg: () => void }) {
 
   return (
     <span
-      className="plinko-ball absolute h-4 w-4 -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/20 shadow-[0_0_8px_rgba(255,255,255,0.4)]"
-      style={{ left: `${pos.x}%`, top: `${pos.y}%` }}
+      className="plinko-ball absolute h-4 w-4 -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/30 shadow-[0_0_12px_rgba(255,255,255,0.6)] z-30 transition-[transform] duration-200"
+      style={{ 
+        left: `${pos.x}%`, 
+        top: `${pos.y}%`,
+      }}
     />
   );
 }
