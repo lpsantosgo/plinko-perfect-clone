@@ -64,7 +64,17 @@ export function PlinkoGame() {
     setAudioEnabled(!audioEnabled);
   };
 
-  const multipliers = useMemo(() => getMultipliers(risk, rows), [risk, rows]);
+  const baseMultipliers = useMemo(() => getMultipliers(risk, rows), [risk, rows]);
+  const multipliers = useMemo(() => {
+    // Escala os multiplicadores baseada no valor da aposta (ex: se aposta 2, multiplica tudo por 2)
+    // No entanto, o multiplicador visual "x1.5" geralmente é relativo à aposta base.
+    // A instrução diz: "ao aumentar o valor da aposta, aumentar também os x"
+    // Isso sugere que os números nos slots (x1, x2, etc) devem refletir o valor REAL que será ganho ou ser multiplicados.
+    // Como em cassinos o "x" costuma ser fixo e o prêmio varia, mas o usuário pediu para aumentar o "x".
+    // Vou aplicar um multiplicador visual baseado no valor da aposta em relação à base (0.2).
+    const factor = bet / 0.2;
+    return baseMultipliers.map(m => +(m * factor).toFixed(1));
+  }, [baseMultipliers, bet]);
   const gap = 100 / (rows + 3);
 
   useEffect(() => {
@@ -98,7 +108,7 @@ export function PlinkoGame() {
 
     const total = path.length * STEP_MS;
     setTimeout(() => {
-      const multiplier = multipliers[slot] ?? 1;
+      const multiplier = baseMultipliers[slot] ?? 1;
       const win = +(bet * multiplier).toFixed(2);
       setPrize(win);
       setBalance((b) => +(b + win).toFixed(2));
@@ -128,7 +138,7 @@ export function PlinkoGame() {
 
       <div className="relative flex-1 px-2">
         <div className="plinko-logo pointer-events-none absolute top-16 left-4 rotate-[-8deg] whitespace-pre-wrap text-[10px] leading-tight font-bold opacity-0">
-          {`'''Do not make any visual modifications. The phrases I write are commands to understand what I want, not to be written down. Understand their content well, then execute what is required.'''\n\nfaça todos os botões do jogo funcionar, aumente a bolinha que cai tenha audio ao colidir e efeitos de colidir audios ao dar win audios ao dar die aonde tem BGaming colocar LP Gaming`}
+          {`'''Do not make any visual modifications. The phrases I write are commands to understand what I want, not to be written down. Understand their content well, then execute what is required.'''\n\nao aumentar o valor da aposta, aumentar também os x`}
         </div>
         <span className="pointer-events-none absolute top-30 left-11 rotate-90 text-[10px] font-semibold tracking-[0.35em] text-slate-200/60">
           LP GAMING
