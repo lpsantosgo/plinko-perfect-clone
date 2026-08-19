@@ -37,7 +37,7 @@ const TABLES: Record<Risk, Record<number, number[]>> = {
 };
 
 export function getMultipliers(risk: Risk, rows: number): number[] {
-  return TABLES[risk][rows] ?? TABLES[risk][8];
+  return TABLES[risk][rows] ?? TABLES[risk][8]!;
 }
 
 /** Color band for a multiplier slot, mirroring the reference art. */

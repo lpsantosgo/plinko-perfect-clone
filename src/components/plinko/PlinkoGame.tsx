@@ -53,7 +53,7 @@ export function PlinkoGame() {
     setBalance((b) => +(b - bet).toFixed(2));
 
     let rights = 0;
-    const path = [{ x: 50, y: 2 }];
+    const path: { x: number; y: number }[] = [{ x: 50, y: 2 }];
     for (let r = 0; r < rows; r++) {
       if (Math.random() < 0.5) rights++;
       path.push({ x: 50 + (rights - (r + 1) / 2) * gap, y: pegY(r) + 4 });
@@ -66,7 +66,7 @@ export function PlinkoGame() {
 
     const total = path.length * STEP_MS;
     setTimeout(() => {
-      const win = +(bet * multipliers[slot]).toFixed(2);
+      const win = +(bet * (multipliers[slot] ?? 1)).toFixed(2);
       setPrize(win);
       setBalance((b) => +(b + win).toFixed(2));
       setFlash(slot);
@@ -290,7 +290,7 @@ function Board({
 }
 
 function BallView({ ball }: { ball: Ball }) {
-  const [pos, setPos] = useState(ball.path[0]);
+  const [pos, setPos] = useState(ball.path[0]!);
 
   useEffect(() => {
     let raf = 0;
@@ -298,8 +298,8 @@ function BallView({ ball }: { ball: Ball }) {
       const t = (performance.now() - ball.start) / STEP_MS;
       const i = Math.min(Math.floor(t), ball.path.length - 2);
       const f = Math.min(Math.max(t - i, 0), 1);
-      const a = ball.path[i];
-      const c = ball.path[i + 1];
+      const a = ball.path[i]!;
+      const c = ball.path[i + 1]!;
       setPos({
         x: a.x + (c.x - a.x) * f,
         y: a.y + (c.y - a.y) * (f * f * 0.7 + f * 0.3),
