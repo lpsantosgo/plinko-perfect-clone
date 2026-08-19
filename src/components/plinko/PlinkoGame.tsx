@@ -17,8 +17,8 @@ function slotClass(index: number, total: number) {
 
 function CollisionEffect({ x, y }: { x: number; y: number }) {
   return (
-    <div 
-      className="absolute h-6 w-6 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white/30 animate-ping pointer-events-none"
+    <div
+      className="pointer-events-none absolute h-8 w-8 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white bg-white/20 shadow-[0_0_15px_#fff,0_0_30px_#fff] animate-ping opacity-0"
       style={{ left: `${x}%`, top: `${y}%` }}
     />
   );
