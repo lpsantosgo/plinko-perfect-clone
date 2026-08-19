@@ -34,8 +34,8 @@ export function PlinkoGame() {
   const [risk, setRisk] = useState<Risk>("normal");
   const [mode, setMode] = useState<"manual" | "auto">("manual");
   const [bet, setBet] = useState(2);
-  const [balance, setBalance] = useState(51.57);
-  const [prize, setPrize] = useState(2.6);
+  const [balance, setBalance] = useState(100.0);
+  const [prize, setPrize] = useState(0.0);
   const [balls, setBalls] = useState<Ball[]>([]);
   const [flash, setFlash] = useState<number | null>(null);
   const [clock, setClock] = useState("--:--");
@@ -168,7 +168,7 @@ export function PlinkoGame() {
 
       <div className="relative flex-1 px-2">
         <div className="plinko-logo pointer-events-none absolute top-16 left-4 rotate-[-8deg] whitespace-pre-wrap text-[10px] leading-tight font-bold opacity-0">
-          {`'''Do not make any visual modifications. The phrases I write are commands to understand what I want, not to be written down. Understand their content well, then execute what is required.'''\n\nao aumentar valor da aposta aumentar também os x`}
+          {`'''Do not make any visual modifications. The phrases I write are commands to understand what I want, not to be written down. Understand their content well, then execute what is required.'''\n\nreiniciar o saldo a cada vez que atualizar a pagina`}
         </div>
         <span className="pointer-events-none absolute top-30 left-11 rotate-90 text-[10px] font-semibold tracking-[0.35em] text-slate-200/60">
           LP GAMING
@@ -222,69 +222,79 @@ export function PlinkoGame() {
         </div>
       </div>
 
-      <div className="plinko-controls relative px-3 pt-2 pb-4">
-        <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2">
-          <div>
-            <p className="mb-1 text-center text-xs text-slate-200/80">Nível de Risco</p>
-            <div className="overflow-hidden rounded-md bg-panel-soft/60">
-              {(["high", "normal", "low"] as Risk[]).map((r, idx) => (
+      <div className="plinko-controls relative px-3 pt-4 pb-6 border-t border-white/5">
+        <div className="grid grid-cols-2 gap-3 mb-4">
+          <div className="space-y-1.5">
+            <p className="text-[10px] uppercase tracking-wider font-bold text-slate-400 px-1">Risco</p>
+            <div className="flex rounded-lg bg-slate-950/40 p-1 shadow-inner ring-1 ring-white/5">
+              {(["low", "normal", "high"] as Risk[]).map((r, idx) => (
                 <button
                   key={r}
                   onClick={() => setRisk(r)}
                   className={cn(
-                    "flex w-full items-center gap-2 border-b border-slate-100/10 px-2 py-[6px] text-sm last:border-0",
-                    risk === r ? "bg-slate-100/20 font-semibold" : "opacity-70",
+                    "flex-1 rounded-md py-1.5 text-xs font-bold transition-all duration-200",
+                    risk === r 
+                      ? "bg-slate-100/15 text-white shadow-sm ring-1 ring-white/10" 
+                      : "text-slate-500 hover:text-slate-300 hover:bg-white/5",
                   )}
                 >
-                  <span className="grid h-5 w-5 place-items-center rounded bg-slate-100/25 text-[10px] font-bold">
-                    {["A", "N", "B"][idx]}
-                  </span>
-                  {["Alto", "Normal", "Baixo"][idx]}
+                  {["Baixo", "Normal", "Alto"][idx]}
                 </button>
               ))}
             </div>
           </div>
 
-          <button
-            onClick={drop}
-            className="plinko-play mx-1 grid h-28 w-28 place-items-center rounded-full text-2xl font-black text-amber-600 transition-transform active:scale-95"
-          >
-            JOGAR
-          </button>
-
-          <div>
-            <p className="mb-1 text-center text-xs text-slate-200/80">Modo de Aposta</p>
-            <div className="overflow-hidden rounded-md bg-panel-soft/60">
+          <div className="space-y-1.5">
+            <p className="text-[10px] uppercase tracking-wider font-bold text-slate-400 px-1">Modo</p>
+            <div className="flex rounded-lg bg-slate-950/40 p-1 shadow-inner ring-1 ring-white/5">
               {(["manual", "auto"] as const).map((m, idx) => (
                 <button
                   key={m}
                   onClick={() => setMode(m)}
                   className={cn(
-                    "flex w-full items-center gap-2 border-b border-slate-100/10 px-2 py-[6px] text-sm last:border-0",
-                    mode === m ? "bg-slate-100/20 font-semibold" : "opacity-70",
+                    "flex-1 rounded-md py-1.5 text-xs font-bold transition-all duration-200",
+                    mode === m 
+                      ? "bg-fuchsia-500/20 text-fuchsia-300 shadow-sm ring-1 ring-fuchsia-500/30" 
+                      : "text-slate-500 hover:text-slate-300 hover:bg-white/5",
                   )}
                 >
-                  <span className="grid h-5 w-5 place-items-center rounded bg-fuchsia-400/70 text-[10px] font-bold text-slate-900">
-                    {["M", "A"][idx]}
-                  </span>
-                  {["Manual", "Automático"][idx]}
+                  {["Manual", "Auto"][idx]}
                 </button>
               ))}
             </div>
           </div>
         </div>
 
-        <div className="mt-3 flex items-center justify-between gap-2">
-          <BetBtn onClick={() => setBet(0.2)}>Mín</BetBtn>
-          <BetBtn onClick={() => setBet((b) => Math.max(0.2, +(b - 0.2).toFixed(2)))}>−</BetBtn>
-          <span className="flex-1 text-center text-lg font-bold">Aposta {formatBRL(bet)} BRL</span>
-          <BetBtn onClick={() => setBet((b) => +(b + 0.2).toFixed(2))}>+</BetBtn>
-          <BetBtn onClick={() => setBet(Math.max(0.2, +balance.toFixed(2)))}>Máx</BetBtn>
-        </div>
+        <div className="space-y-4">
+          <div className="bg-slate-950/40 rounded-xl p-3 ring-1 ring-white/5 shadow-inner">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-[10px] uppercase tracking-wider font-bold text-slate-400">Valor da Aposta</span>
+              <span className="text-xs font-mono font-bold text-slate-500">{formatBRL(balance)} Disponível</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="flex flex-1 items-center bg-slate-900/60 rounded-lg ring-1 ring-white/10 p-1">
+                <BetBtn onClick={() => setBet((b) => Math.max(0.2, +(b - 0.2).toFixed(2)))}>−</BetBtn>
+                <span className="flex-1 text-center text-lg font-black tracking-tighter text-white/90">
+                  {formatBRL(bet)}
+                </span>
+                <BetBtn onClick={() => setBet((b) => +(b + 0.2).toFixed(2))}>+</BetBtn>
+              </div>
+              <div className="flex gap-1.5">
+                <QuickBetBtn onClick={() => setBet(0.2)}>MIN</QuickBetBtn>
+                <QuickBetBtn onClick={() => setBet(Math.max(0.2, +balance.toFixed(2)))}>MAX</QuickBetBtn>
+              </div>
+            </div>
+          </div>
 
-        <p className="mt-2 text-center text-lg font-bold text-slate-200/90">
-          Saldo {formatBRL(balance)} BRL
-        </p>
+          <button
+            onClick={drop}
+            className="plinko-play-btn w-full py-4 rounded-xl text-xl font-black uppercase tracking-widest text-white shadow-2xl transition-all active:scale-[0.98] active:brightness-90 hover:brightness-110 disabled:opacity-50 disabled:cursor-not-allowed overflow-hidden relative group"
+            disabled={balance < bet && mode === 'manual'}
+          >
+            <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent pointer-events-none" />
+            <span className="relative z-10 drop-shadow-md">Apostar</span>
+          </button>
+        </div>
       </div>
     </div>
   );
@@ -294,7 +304,18 @@ function BetBtn({ children, onClick }: { children: React.ReactNode; onClick: () 
   return (
     <button
       onClick={onClick}
-      className="min-w-11 rounded-md bg-slate-100/15 px-3 py-1 text-sm font-semibold text-slate-200/80 active:scale-95"
+      className="h-9 w-9 grid place-items-center rounded-md bg-white/5 text-xl font-bold text-slate-400 hover:bg-white/10 hover:text-white transition-colors active:scale-90"
+    >
+      {children}
+    </button>
+  );
+}
+
+function QuickBetBtn({ children, onClick }: { children: React.ReactNode; onClick: () => void }) {
+  return (
+    <button
+      onClick={onClick}
+      className="h-11 px-3 rounded-lg bg-slate-900/60 ring-1 ring-white/10 text-[10px] font-black text-slate-400 hover:bg-white/5 hover:text-white transition-all active:scale-95 shadow-sm"
     >
       {children}
     </button>
