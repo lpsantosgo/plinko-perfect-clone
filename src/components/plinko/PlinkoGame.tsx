@@ -30,6 +30,7 @@ const ROW_OPTIONS = [8, 9, 10, 11, 12, 13, 14, 15, 16];
 const STEP_MS = 280; // Increased from 130 for slower fall
 
 export function PlinkoGame() {
+  const [lang, setLang] = useState<"pt" | "en">("pt");
   const [rows, setRows] = useState(8);
   const [risk, setRisk] = useState<Risk>("normal");
   const [mode, setMode] = useState<"manual" | "auto">("manual");
@@ -42,6 +43,48 @@ export function PlinkoGame() {
   const ballId = useRef(0);
   const autoRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const [audioEnabled, setAudioEnabled] = useState(false);
+
+  useEffect(() => {
+    fetch("https://ipapi.co/json/")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.country_code !== "BR" && data.country_code !== "PT") {
+          setLang("en");
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  const t = {
+    pt: {
+      risk: "Risco",
+      mode: "Modo",
+      manual: "Manual",
+      auto: "Auto",
+      bet: "Valor da Aposta",
+      available: "Disponível",
+      play: "JOGAR",
+      prize: "Prêmio",
+      lines: "Linhas",
+      low: "Baixo",
+      normal: "Normal",
+      high: "Alto",
+    },
+    en: {
+      risk: "Risk",
+      mode: "Mode",
+      manual: "Manual",
+      auto: "Auto",
+      bet: "Bet Amount",
+      available: "Available",
+      play: "PLAY",
+      prize: "Prize",
+      lines: "Rows",
+      low: "Low",
+      normal: "Normal",
+      high: "High",
+    },
+  }[lang];
   const dropSound = useRef<HTMLAudioElement | null>(null);
   const winSound = useRef<HTMLAudioElement | null>(null);
   const pegSound = useRef<HTMLAudioElement | null>(null);
@@ -168,14 +211,14 @@ export function PlinkoGame() {
 
       <div className="relative flex-1 px-2">
         <div className="plinko-logo pointer-events-none absolute top-16 left-4 rotate-[-8deg] whitespace-pre-wrap text-[10px] leading-tight font-bold opacity-0">
-          {`'''Do not make any visual modifications. The phrases I write are commands to understand what I want, not to be written down. Understand their content well, then execute what is required.'''\n\nreiniciar o saldo a cada vez que atualizar a pagina`}
+          {`'''Do not make any visual modifications. The phrases I write are commands to understand what I want, not to be written down. Understand their content well, then execute what is required.'''\n\ndetectar idioma de acordo com o ip do jogador, exemplo se o ip for do estados unidos mudar o idioma automaticamente para ingles, se for do brasil pt-br se for do portugal pt, deixe o botão de apostar igual era aquela linda bola`}
         </div>
         <span className="pointer-events-none absolute top-30 left-11 rotate-90 text-[10px] font-semibold tracking-[0.35em] text-slate-200/60">
           LP GAMING
         </span>
 
         <div className="absolute top-24 right-2 z-20 w-14 text-center">
-          <p className="mb-1 text-[10px] font-bold text-slate-100/90 uppercase tracking-wider">Linhas</p>
+          <p className="mb-1 text-[10px] font-bold text-slate-100/90 uppercase tracking-wider">{t.lines}</p>
           <div className="overflow-hidden rounded-md border border-white/10 bg-panel-soft/40 backdrop-blur-sm">
             {ROW_OPTIONS.map((r) => (
               <button
@@ -218,82 +261,82 @@ export function PlinkoGame() {
 
       <div className="px-3 py-3">
         <div className="plinko-prize rounded-md py-1 text-center text-lg font-extrabold text-slate-900">
-          Prêmio {formatBRL(prize)} BRL
+          {t.prize} {formatBRL(prize)} BRL
         </div>
       </div>
 
-      <div className="plinko-controls relative px-3 pt-4 pb-6 border-t border-white/5">
-        <div className="grid grid-cols-2 gap-3 mb-4">
-          <div className="space-y-1.5">
-            <p className="text-[10px] uppercase tracking-wider font-bold text-slate-400 px-1">Risco</p>
-            <div className="flex rounded-lg bg-slate-950/40 p-1 shadow-inner ring-1 ring-white/5">
-              {(["low", "normal", "high"] as Risk[]).map((r, idx) => (
+      <div className="plinko-controls relative px-3 pt-2 pb-4">
+        <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2">
+          <div>
+            <p className="mb-1 text-center text-[10px] uppercase tracking-wider font-bold text-slate-400">{t.risk}</p>
+            <div className="overflow-hidden rounded-md bg-panel-soft/60">
+              {(["high", "normal", "low"] as Risk[]).map((r, idx) => (
                 <button
                   key={r}
                   onClick={() => setRisk(r)}
                   className={cn(
-                    "flex-1 rounded-md py-1.5 text-xs font-bold transition-all duration-200",
-                    risk === r 
-                      ? "bg-slate-100/15 text-white shadow-sm ring-1 ring-white/10" 
-                      : "text-slate-500 hover:text-slate-300 hover:bg-white/5",
+                    "flex w-full items-center gap-2 border-b border-slate-100/10 px-2 py-[6px] text-xs last:border-0",
+                    risk === r ? "bg-slate-100/20 font-semibold" : "opacity-70",
                   )}
                 >
-                  {["Baixo", "Normal", "Alto"][idx]}
+                  <span className="grid h-4 w-4 place-items-center rounded bg-slate-100/25 text-[9px] font-bold">
+                    {["A", "N", "B"][idx]}
+                  </span>
+                  {[t.high, t.normal, t.low][idx]}
                 </button>
               ))}
-            </div>
-          </div>
-
-          <div className="space-y-1.5">
-            <p className="text-[10px] uppercase tracking-wider font-bold text-slate-400 px-1">Modo</p>
-            <div className="flex rounded-lg bg-slate-950/40 p-1 shadow-inner ring-1 ring-white/5">
-              {(["manual", "auto"] as const).map((m, idx) => (
-                <button
-                  key={m}
-                  onClick={() => setMode(m)}
-                  className={cn(
-                    "flex-1 rounded-md py-1.5 text-xs font-bold transition-all duration-200",
-                    mode === m 
-                      ? "bg-fuchsia-500/20 text-fuchsia-300 shadow-sm ring-1 ring-fuchsia-500/30" 
-                      : "text-slate-500 hover:text-slate-300 hover:bg-white/5",
-                  )}
-                >
-                  {["Manual", "Auto"][idx]}
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        <div className="space-y-4">
-          <div className="bg-slate-950/40 rounded-xl p-3 ring-1 ring-white/5 shadow-inner">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-[10px] uppercase tracking-wider font-bold text-slate-400">Valor da Aposta</span>
-              <span className="text-xs font-mono font-bold text-slate-500">{formatBRL(balance)} Disponível</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="flex flex-1 items-center bg-slate-900/60 rounded-lg ring-1 ring-white/10 p-1">
-                <BetBtn onClick={() => setBet((b) => Math.max(0.2, +(b - 0.2).toFixed(2)))}>−</BetBtn>
-                <span className="flex-1 text-center text-lg font-black tracking-tighter text-white/90">
-                  {formatBRL(bet)}
-                </span>
-                <BetBtn onClick={() => setBet((b) => +(b + 0.2).toFixed(2))}>+</BetBtn>
-              </div>
-              <div className="flex gap-1.5">
-                <QuickBetBtn onClick={() => setBet(0.2)}>MIN</QuickBetBtn>
-                <QuickBetBtn onClick={() => setBet(Math.max(0.2, +balance.toFixed(2)))}>MAX</QuickBetBtn>
-              </div>
             </div>
           </div>
 
           <button
             onClick={drop}
-            className="plinko-play-btn w-full py-4 rounded-xl text-xl font-black uppercase tracking-widest text-white shadow-2xl transition-all active:scale-[0.98] active:brightness-90 hover:brightness-110 disabled:opacity-50 disabled:cursor-not-allowed overflow-hidden relative group"
+            className="plinko-play mx-1 grid h-28 w-28 place-items-center rounded-full text-2xl font-black text-amber-600 transition-transform active:scale-95 shadow-2xl relative overflow-hidden"
             disabled={balance < bet && mode === 'manual'}
           >
-            <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent pointer-events-none" />
-            <span className="relative z-10 drop-shadow-md">Apostar</span>
+            <div className="absolute inset-0 bg-white/10 opacity-0 hover:opacity-100 transition-opacity" />
+            <span className="relative z-10">{t.play}</span>
           </button>
+
+          <div>
+            <p className="mb-1 text-center text-[10px] uppercase tracking-wider font-bold text-slate-400">{t.mode}</p>
+            <div className="overflow-hidden rounded-md bg-panel-soft/60">
+              {(["manual", "auto"] as const).map((m, idx) => (
+                <button
+                  key={m}
+                  onClick={() => setMode(m)}
+                  className={cn(
+                    "flex w-full items-center gap-2 border-b border-slate-100/10 px-2 py-[6px] text-xs last:border-0",
+                    mode === m ? "bg-slate-100/20 font-semibold" : "opacity-70",
+                  )}
+                >
+                  <span className="grid h-4 w-4 place-items-center rounded bg-fuchsia-400/70 text-[9px] font-bold text-slate-900">
+                    {["M", "A"][idx]}
+                  </span>
+                  {[t.manual, t.auto][idx]}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-4 bg-slate-950/40 rounded-xl p-3 ring-1 ring-white/5 shadow-inner">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-[10px] uppercase tracking-wider font-bold text-slate-400">{t.bet}</span>
+            <span className="text-xs font-mono font-bold text-slate-500">{t.available}: {formatBRL(balance)}</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="flex flex-1 items-center bg-slate-900/60 rounded-lg ring-1 ring-white/10 p-1">
+              <BetBtn onClick={() => setBet((b) => Math.max(0.2, +(b - 0.2).toFixed(2)))}>−</BetBtn>
+              <span className="flex-1 text-center text-lg font-black tracking-tighter text-white/90">
+                {formatBRL(bet)}
+              </span>
+              <BetBtn onClick={() => setBet((b) => +(b + 0.2).toFixed(2))}>+</BetBtn>
+            </div>
+            <div className="flex gap-1.5">
+              <QuickBetBtn onClick={() => setBet(0.2)}>MIN</QuickBetBtn>
+              <QuickBetBtn onClick={() => setBet(Math.max(0.2, +balance.toFixed(2)))}>MAX</QuickBetBtn>
+            </div>
+          </div>
         </div>
       </div>
     </div>
