@@ -33,7 +33,7 @@ export function PlinkoGame() {
   const [localeData, setLocaleData] = useState({ language: "pt-BR", currency: "BRL", symbol: "BRL" });
   const ballId = useRef(0);
   const autoRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const [audioEnabled, setAudioEnabled] = useState(false);
+  const [audioEnabled, setAudioEnabled] = useState(true);
   const dropSound = useRef<HTMLAudioElement | null>(null);
   const winSound = useRef<HTMLAudioElement | null>(null);
   const pegSound = useRef<HTMLAudioElement | null>(null);
@@ -152,7 +152,7 @@ export function PlinkoGame() {
 
       <div className="relative flex-1 px-2">
         <div className="plinko-logo pointer-events-none absolute top-16 left-4 rotate-[-8deg] whitespace-pre-wrap text-[10px] leading-tight font-bold opacity-0">
-          {`'''Do not make any visual modifications. The phrases I write are commands to understand what I want, not to be written down. Understand their content well, then execute what is required.'''\n\nsons ao colidir, e sons ao ganhar ou perder`}
+          {`'''Do not make any visual modifications. The phrases I write are commands to understand what I want, not to be written down. Understand their content well, then execute what is required.'''\n\nbotões casinha voltar funcionando, botão ? funcionando, som iniciar ligado, só desligar se clicar para desligar.`}
         </div>
         <span className="pointer-events-none absolute top-30 left-11 rotate-90 text-[10px] font-semibold tracking-[0.35em] text-slate-200/60">
           LP GAMING
@@ -178,7 +178,10 @@ export function PlinkoGame() {
           </div>
         </div>
 
-        <button className="absolute top-1/2 left-0 z-20 -translate-y-1/2 rounded-r-md bg-slate-200/25 px-1 py-6">
+        <button 
+          onClick={() => window.location.href = '/'}
+          className="absolute top-1/2 left-0 z-20 -translate-y-1/2 rounded-r-md bg-slate-200/25 px-1 py-6 active:scale-95 transition-transform"
+        >
           <ChevronLeft className="h-4 w-4" />
         </button>
 
@@ -301,9 +304,11 @@ function TopBar({
   );
   return (
     <header className="flex items-center gap-3 px-3 pt-3">
-      <Circle>
-        <Home className="h-5 w-5" />
-      </Circle>
+      <button onClick={() => window.location.href = '/'} className="focus:outline-none active:scale-95 transition-transform">
+        <Circle>
+          <Home className="h-5 w-5" />
+        </Circle>
+      </button>
       <span className="text-lg font-semibold text-slate-100/90">{clock}</span>
       <div className="ml-auto flex gap-2">
         <Circle>
@@ -312,9 +317,11 @@ function TopBar({
         <Circle>
           <Timer className="h-5 w-5" />
         </Circle>
-        <Circle>
-          <HelpCircle className="h-5 w-5" />
-        </Circle>
+        <button onClick={() => window.open('https://github.com', '_blank')} className="focus:outline-none active:scale-95 transition-transform">
+          <Circle>
+            <HelpCircle className="h-5 w-5" />
+          </Circle>
+        </button>
         <button onClick={() => setAudioEnabled(!audioEnabled)} className="focus:outline-none">
           <Circle>
             <Volume2 className={cn("h-5 w-5", !audioEnabled && "opacity-40")} />
