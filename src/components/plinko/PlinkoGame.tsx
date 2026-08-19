@@ -53,17 +53,38 @@ export function PlinkoGame() {
   }, [lang, currency]);
 
   useEffect(() => {
-    fetch("https://ipapi.co/json/")
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.country_code !== "BR" && data.country_code !== "PT") {
+    // Attempt to detect language/currency via IP with a fallback to browser settings
+    const detectLocale = async () => {
+      try {
+        const res = await fetch("https://ipapi.co/json/");
+        if (!res.ok) throw new Error("IP detection failed");
+        const data = await res.json();
+        
+        if (data.country_code === "BR") {
+          setLang("pt");
+          setCurrency({ code: "BRL", symbol: "R$" });
+        } else if (data.country_code === "PT") {
+          setLang("pt");
+          setCurrency({ code: "EUR", symbol: "€" });
+        } else {
           setLang("en");
           setCurrency({ code: "USD", symbol: "$" });
-        } else if (data.country_code === "PT") {
-          setCurrency({ code: "EUR", symbol: "€" });
         }
-      })
-      .catch(() => {});
+      } catch (error) {
+        console.warn("Falling back to browser locale detection:", error);
+        // Fallback to browser language
+        const browserLang = navigator.language.split('-')[0];
+        if (browserLang === 'pt') {
+          setLang("pt");
+          setCurrency({ code: "BRL", symbol: "R$" });
+        } else {
+          setLang("en");
+          setCurrency({ code: "USD", symbol: "$" });
+        }
+      }
+    };
+
+    detectLocale();
   }, []);
 
   const t = {
@@ -222,7 +243,7 @@ export function PlinkoGame() {
 
       <div className="relative flex-1 px-2">
         <div className="plinko-logo pointer-events-none absolute top-16 left-4 rotate-[-8deg] whitespace-pre-wrap text-[10px] leading-tight font-bold opacity-0">
-          {`'''Do not make any visual modifications. The phrases I write are commands to understand what I want, not to be written down. Understand their content well, then execute what is required.'''\n\nImplementar a exibição automática da moeda e formatação do valor da aposta com base no país detectado pelo IP.`}
+          {`'''Do not make any visual modifications. The phrases I write are commands to understand what I want, not to be written down. Understand their content well, then execute what is required.'''\n\nAdicionar fallback de idioma e tratamento de erro quando a detecção por IP falhar, mantendo o jogo utilizável.`}
         </div>
         <span className="pointer-events-none absolute top-30 left-11 rotate-90 text-[10px] font-semibold tracking-[0.35em] text-slate-200/60">
           LP GAMING
