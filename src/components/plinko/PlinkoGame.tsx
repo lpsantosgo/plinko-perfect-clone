@@ -367,6 +367,7 @@ function Board({
       }, 600);
       return () => clearTimeout(timer);
     }
+    return undefined;
   }, [effects]);
 
   const handlePeg = (x: number, y: number) => {
