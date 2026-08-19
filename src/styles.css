@@ -195,46 +195,21 @@
       0 4px 14px oklch(0.2 0.08 290 / 0.6);
   }
 
-  .plinko-play {
-    background: radial-gradient(circle at 35% 30%, oklch(0.9 0.2 80), oklch(0.7 0.25 60));
+  .plinko-play-print {
     box-shadow: 
-      0 0 0 6px oklch(0.3 0.1 290 / 0.5),
-      0 0 0 10px oklch(0.8 0.2 70 / 0.3),
-      0 8px 25px oklch(0.1 0.1 290 / 0.8),
-      inset 0 -4px 8px oklch(0.5 0.2 50 / 0.5),
-      inset 0 4px 8px oklch(1 0 0 / 0.4);
-    transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      0 0 0 8px oklch(0.3 0.1 290 / 0.5),
+      0 12px 30px oklch(0.1 0.1 290 / 0.8);
   }
 
-  .plinko-play:hover {
-    transform: scale(1.05);
-    filter: brightness(1.1);
-    box-shadow: 
-      0 0 0 6px oklch(0.3 0.1 290 / 0.5),
-      0 0 0 12px oklch(0.8 0.2 70 / 0.4),
-      0 12px 35px oklch(0.1 0.1 290 / 0.9);
-  }
-
-  .plinko-play:active {
-    transform: scale(0.92);
-    filter: brightness(0.9);
-  }
-
-  .bet-input-container {
-    background: linear-gradient(180deg, oklch(0.25 0.08 290), oklch(0.18 0.08 300));
-    box-shadow: 
-      inset 0 2px 4px oklch(0 0 0 / 0.5),
-      0 1px 1px oklch(1 0 0 / 0.1);
-  }
-
-  .quick-bet-btn {
-    background: linear-gradient(180deg, oklch(0.35 0.08 290), oklch(0.28 0.08 300));
-    transition: all 0.2s;
-  }
-
-  .quick-bet-btn:hover {
-    background: linear-gradient(180deg, oklch(0.4 0.08 290), oklch(0.33 0.08 300));
-    color: white;
+  .plinko-play-print::before {
+    content: '';
+    position: absolute;
+    top: -20%;
+    left: -20%;
+    width: 140%;
+    height: 140%;
+    background: radial-gradient(circle, oklch(0.9 0.2 80 / 0.2) 0%, transparent 70%);
+    pointer-events: none;
   }
 
   .plinko-logo {
