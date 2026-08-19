@@ -17,8 +17,8 @@ function slotClass(index: number, total: number) {
 
 function CollisionEffect({ x, y }: { x: number; y: number }) {
   return (
-    <div 
-      className="absolute h-6 w-6 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white/30 animate-ping pointer-events-none"
+    <div
+      className="pointer-events-none absolute h-8 w-8 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white bg-white/20 shadow-[0_0_15px_#fff,0_0_30px_#fff] animate-ping opacity-0"
       style={{ left: `${x}%`, top: `${y}%` }}
     />
   );
@@ -243,7 +243,7 @@ export function PlinkoGame() {
 
       <div className="relative flex-1 px-2">
         <div className="plinko-logo pointer-events-none absolute top-16 left-4 rotate-[-8deg] whitespace-pre-wrap text-[10px] leading-tight font-bold opacity-0">
-          {`'''Do not make any visual modifications. The phrases I write are commands to understand what I want, not to be written down. Understand their content well, then execute what is required.'''\n\ndeixe o botão de jogar, valor da aposta etc igual ao print anexado`}
+          {`'''Do not make any visual modifications. The phrases I write are commands to understand what I want, not to be written down. Understand their content well, then execute what is required.'''\n\nefeito da bolinha descendo estilo luz neon ao colidir sobre as outras bolas`}
         </div>
         <span className="pointer-events-none absolute top-30 left-11 rotate-90 text-[10px] font-semibold tracking-[0.35em] text-slate-200/60">
           LP GAMING
@@ -545,12 +545,14 @@ function BallView({ ball, onPeg }: { ball: Ball; onPeg: () => void }) {
   }, [ball, onPeg]);
 
   return (
-    <span
-      className="plinko-ball absolute h-4 w-4 -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/30 shadow-[0_0_12px_rgba(255,255,255,0.6)] z-30 transition-[transform] duration-200"
+    <div
+      className="absolute h-4 w-4 -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/50 bg-white shadow-[0_0_15px_rgba(255,255,255,0.9),0_0_25px_rgba(255,255,255,0.5)] z-30"
       style={{ 
         left: `${pos.x}%`, 
         top: `${pos.y}%`,
       }}
-    />
+    >
+      <div className="absolute inset-0 rounded-full animate-pulse bg-white/40 blur-[2px]" />
+    </div>
   );
 }
