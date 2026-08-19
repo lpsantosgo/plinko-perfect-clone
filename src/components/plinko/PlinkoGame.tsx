@@ -34,8 +34,8 @@ export function PlinkoGame() {
   const [risk, setRisk] = useState<Risk>("normal");
   const [mode, setMode] = useState<"manual" | "auto">("manual");
   const [bet, setBet] = useState(2);
-  const [balance, setBalance] = useState(51.57);
-  const [prize, setPrize] = useState(2.6);
+  const [balance, setBalance] = useState(100.0);
+  const [prize, setPrize] = useState(0.0);
   const [balls, setBalls] = useState<Ball[]>([]);
   const [flash, setFlash] = useState<number | null>(null);
   const [clock, setClock] = useState("--:--");
@@ -168,7 +168,7 @@ export function PlinkoGame() {
 
       <div className="relative flex-1 px-2">
         <div className="plinko-logo pointer-events-none absolute top-16 left-4 rotate-[-8deg] whitespace-pre-wrap text-[10px] leading-tight font-bold opacity-0">
-          {`'''Do not make any visual modifications. The phrases I write are commands to understand what I want, not to be written down. Understand their content well, then execute what is required.'''\n\ndeixar os botões mais bonitos e profissionais`}
+          {`'''Do not make any visual modifications. The phrases I write are commands to understand what I want, not to be written down. Understand their content well, then execute what is required.'''\n\nreiniciar o saldo a cada vez que atualizar a pagina`}
         </div>
         <span className="pointer-events-none absolute top-30 left-11 rotate-90 text-[10px] font-semibold tracking-[0.35em] text-slate-200/60">
           LP GAMING
