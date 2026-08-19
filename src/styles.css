@@ -4,6 +4,20 @@
 
 @custom-variant dark (&:is(.dark *));
 
+@theme {
+  --color-slot-1: oklch(0.72 0.18 45);
+  --color-slot-2: oklch(0.86 0.18 95);
+  --color-slot-3: oklch(0.87 0.2 120);
+  --color-slot-4: oklch(0.82 0.21 140);
+  --color-slot-5: oklch(0.78 0.2 152);
+  --color-gold: oklch(0.83 0.16 82);
+  --color-gold-deep: oklch(0.68 0.16 62);
+  --color-panel: oklch(0.36 0.13 300);
+  --color-panel-soft: oklch(0.45 0.13 300);
+  --color-board-top: oklch(0.42 0.11 245);
+  --color-board-bottom: oklch(0.32 0.13 295);
+}
+
 /*
  * Design system definition.
  *
