@@ -336,14 +336,21 @@ function Board({
   );
 }
 
-function BallView({ ball }: { ball: Ball }) {
+function BallView({ ball, onPeg }: { ball: Ball; onPeg: () => void }) {
   const [pos, setPos] = useState(ball.path[0]!);
+  const lastIndex = useRef(-1);
 
   useEffect(() => {
     let raf = 0;
     const loop = () => {
       const t = (performance.now() - ball.start) / STEP_MS;
       const i = Math.min(Math.floor(t), ball.path.length - 2);
+      
+      if (i > lastIndex.current && i < ball.path.length - 1) {
+        lastIndex.current = i;
+        onPeg();
+      }
+
       const f = Math.min(Math.max(t - i, 0), 1);
       const a = ball.path[i]!;
       const c = ball.path[i + 1]!;
@@ -355,11 +362,11 @@ function BallView({ ball }: { ball: Ball }) {
     };
     raf = requestAnimationFrame(loop);
     return () => cancelAnimationFrame(raf);
-  }, [ball]);
+  }, [ball, onPeg]);
 
   return (
     <span
-      className="plinko-ball absolute h-3 w-3 -translate-x-1/2 -translate-y-1/2 rounded-full"
+      className="plinko-ball absolute h-4 w-4 -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/20 shadow-[0_0_8px_rgba(255,255,255,0.4)]"
       style={{ left: `${pos.x}%`, top: `${pos.y}%` }}
     />
   );
