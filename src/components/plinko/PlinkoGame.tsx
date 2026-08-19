@@ -377,7 +377,7 @@ export function PlinkoGame() {
 
             <div className="flex gap-1">
               <BetBtnPrint onClick={() => setBet((b) => +(b + 0.2).toFixed(2))}>+</BetBtnPrint>
-              <BetBtnPrint onClick={() => setBet(Math.max(0.2, +balance.toFixed(2)))}>Máx</BetBtnBtnPrint>
+              <BetBtnPrint onClick={() => setBet(Math.max(0.2, +balance.toFixed(2)))}>Máx</BetBtnPrint>
             </div>
           </div>
           
