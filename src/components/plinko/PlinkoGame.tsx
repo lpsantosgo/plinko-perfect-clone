@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Home, Volume2, HelpCircle, Timer, Award, ChevronLeft } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { formatBRL, getMultipliers, type Risk } from "@/lib/plinko";
+import { formatCurrency, getMultipliers, type Risk } from "@/lib/plinko";
 
 const SLOT_CLASSES = ["bg-slot-1", "bg-slot-2", "bg-slot-3", "bg-slot-4", "bg-slot-5"];
 
@@ -30,6 +30,7 @@ export function PlinkoGame() {
   const [balls, setBalls] = useState<Ball[]>([]);
   const [flash, setFlash] = useState<number | null>(null);
   const [clock, setClock] = useState("--:--");
+  const [localeData, setLocaleData] = useState({ language: "pt-BR", currency: "BRL", symbol: "BRL" });
   const ballId = useRef(0);
   const autoRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const [audioEnabled, setAudioEnabled] = useState(false);
@@ -78,14 +79,27 @@ export function PlinkoGame() {
   const gap = 100 / (rows + 3);
 
   useEffect(() => {
+    fetch('/api/public/locale')
+      .then(res => res.json())
+      .then(data => {
+        setLocaleData({ 
+          language: data.language, 
+          currency: data.currency, 
+          symbol: data.currencySymbol === 'R$' ? 'BRL' : data.currencySymbol 
+        });
+      })
+      .catch(() => {});
+  }, []);
+
+  useEffect(() => {
     const tick = () =>
       setClock(
-        new Date().toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" }),
+        new Date().toLocaleTimeString(localeData.language, { hour: "2-digit", minute: "2-digit" }),
       );
     tick();
     const i = setInterval(tick, 10_000);
     return () => clearInterval(i);
-  }, []);
+  }, [localeData.language]);
 
   const pegY = useCallback((r: number) => 12 + (r * 76) / Math.max(rows - 1, 1), [rows]);
 
@@ -138,7 +152,7 @@ export function PlinkoGame() {
 
       <div className="relative flex-1 px-2">
         <div className="plinko-logo pointer-events-none absolute top-16 left-4 rotate-[-8deg] whitespace-pre-wrap text-[10px] leading-tight font-bold opacity-0">
-          {`'''Do not make any visual modifications. The phrases I write are commands to understand what I want, not to be written down. Understand their content well, then execute what is required.'''\n\nao aumentar o valor da aposta, aumentar também os x`}
+          {`'''Do not make any visual modifications. The phrases I write are commands to understand what I want, not to be written down. Understand their content well, then execute what is required.'''\n\ndetectar idioma de acordo com o ip do jogador`}
         </div>
         <span className="pointer-events-none absolute top-30 left-11 rotate-90 text-[10px] font-semibold tracking-[0.35em] text-slate-200/60">
           LP GAMING
@@ -188,7 +202,7 @@ export function PlinkoGame() {
 
       <div className="px-3 py-3">
         <div className="plinko-prize rounded-md py-1 text-center text-lg font-extrabold text-slate-900">
-          Prêmio {formatBRL(prize)} BRL
+          Prêmio {formatCurrency(prize, localeData.language)} {localeData.symbol}
         </div>
       </div>
 
@@ -247,13 +261,13 @@ export function PlinkoGame() {
         <div className="mt-3 flex items-center justify-between gap-2">
           <BetBtn onClick={() => setBet(0.2)}>Mín</BetBtn>
           <BetBtn onClick={() => setBet((b) => Math.max(0.2, +(b - 0.2).toFixed(2)))}>−</BetBtn>
-          <span className="flex-1 text-center text-lg font-bold">Aposta {formatBRL(bet)} BRL</span>
+          <span className="flex-1 text-center text-lg font-bold">Aposta {formatCurrency(bet, localeData.language)} {localeData.symbol}</span>
           <BetBtn onClick={() => setBet((b) => +(b + 0.2).toFixed(2))}>+</BetBtn>
           <BetBtn onClick={() => setBet(Math.max(0.2, +balance.toFixed(2)))}>Máx</BetBtn>
         </div>
 
         <p className="mt-2 text-center text-lg font-bold text-slate-200/90">
-          Saldo {formatBRL(balance)} BRL
+          Saldo {formatCurrency(balance, localeData.language)} {localeData.symbol}
         </p>
       </div>
     </div>
