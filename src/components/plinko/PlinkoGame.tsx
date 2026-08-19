@@ -15,138 +15,38 @@ function slotClass(index: number, total: number) {
   return SLOT_CLASSES[4];
 }
 
-function CollisionEffect({ x, y }: { x: number; y: number }) {
-  return (
-    <div
-      className="pointer-events-none absolute h-8 w-8 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white bg-white/20 shadow-[0_0_15px_#fff,0_0_30px_#fff] animate-ping opacity-0"
-      style={{ left: `${x}%`, top: `${y}%` }}
-    />
-  );
-}
-
 type Ball = { id: number; path: { x: number; y: number }[]; start: number; slot: number };
 
 const ROW_OPTIONS = [8, 9, 10, 11, 12, 13, 14, 15, 16];
-const STEP_MS = 280; // Increased from 130 for slower fall
+const STEP_MS = 130;
 
 export function PlinkoGame() {
-  const [lang, setLang] = useState<"pt" | "en">("pt");
-  const [currency, setCurrency] = useState({ code: "BRL", symbol: "R$" });
   const [rows, setRows] = useState(8);
   const [risk, setRisk] = useState<Risk>("normal");
   const [mode, setMode] = useState<"manual" | "auto">("manual");
   const [bet, setBet] = useState(2);
-  const [balance, setBalance] = useState(100.0);
-  const [prize, setPrize] = useState(0.0);
+  const [balance, setBalance] = useState(51.57);
+  const [prize, setPrize] = useState(2.6);
   const [balls, setBalls] = useState<Ball[]>([]);
   const [flash, setFlash] = useState<number | null>(null);
   const [clock, setClock] = useState("--:--");
   const ballId = useRef(0);
   const autoRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const [audioEnabled, setAudioEnabled] = useState(true);
-
-  const formatValue = useCallback((val: number) => {
-    return new Intl.NumberFormat(lang === 'pt' ? 'pt-BR' : 'en-US', {
-      style: 'currency',
-      currency: currency.code,
-    }).format(val);
-  }, [lang, currency]);
-
-  useEffect(() => {
-    // Attempt to detect language/currency via IP with a fallback to browser settings
-    const detectLocale = async () => {
-      try {
-        const res = await fetch("https://ipapi.co/json/");
-        if (!res.ok) throw new Error("IP detection failed");
-        const data = await res.json();
-        
-        if (data.country_code === "BR") {
-          setLang("pt");
-          setCurrency({ code: "BRL", symbol: "R$" });
-        } else if (data.country_code === "PT") {
-          setLang("pt");
-          setCurrency({ code: "EUR", symbol: "€" });
-        } else {
-          setLang("en");
-          setCurrency({ code: "USD", symbol: "$" });
-        }
-      } catch (error) {
-        console.warn("Falling back to browser locale detection:", error);
-        // Fallback to browser language
-        const browserLang = navigator.language.split('-')[0];
-        if (browserLang === 'pt') {
-          setLang("pt");
-          setCurrency({ code: "BRL", symbol: "R$" });
-        } else {
-          setLang("en");
-          setCurrency({ code: "USD", symbol: "$" });
-        }
-      }
-    };
-
-    detectLocale();
-  }, []);
-
-  const t = {
-    pt: {
-      risk: "Risco",
-      mode: "Modo",
-      manual: "Manual",
-      auto: "Auto",
-      bet: "Valor da Aposta",
-      available: "Disponível",
-      play: "JOGAR",
-      prize: "Prêmio",
-      lines: "Linhas",
-      low: "Baixo",
-      normal: "Normal",
-      high: "Alto",
-    },
-    en: {
-      risk: "Risk",
-      mode: "Mode",
-      manual: "Manual",
-      auto: "Auto",
-      bet: "Bet Amount",
-      available: "Available",
-      play: "PLAY",
-      prize: "Prize",
-      lines: "Rows",
-      low: "Low",
-      normal: "Normal",
-      high: "High",
-    },
-  }[lang];
+  const [audioEnabled, setAudioEnabled] = useState(false);
   const dropSound = useRef<HTMLAudioElement | null>(null);
   const winSound = useRef<HTMLAudioElement | null>(null);
   const pegSound = useRef<HTMLAudioElement | null>(null);
   const lossSound = useRef<HTMLAudioElement | null>(null);
-  const lastPegTime = useRef(0);
 
   useEffect(() => {
     dropSound.current = new Audio("/sounds/drop.mp3");
     winSound.current = new Audio("/sounds/win.mp3");
     pegSound.current = new Audio("/sounds/peg.mp3");
     lossSound.current = new Audio("/sounds/loss.mp3");
-    
-    // Pre-load sounds to ensure they are ready
-    [dropSound, winSound, pegSound, lossSound].forEach(ref => {
-      if (ref.current) {
-        ref.current.load();
-      }
-    });
   }, []);
 
   const playSound = (sound: "drop" | "win" | "peg" | "loss") => {
     if (!audioEnabled) return;
-    
-    // Rate limit peg sounds to avoid audio overload/distortion
-    if (sound === "peg") {
-      const now = performance.now();
-      if (now - lastPegTime.current < 60) return; 
-      lastPegTime.current = now;
-    }
-
     let s: HTMLAudioElement | null = null;
     if (sound === "drop") s = dropSound.current;
     if (sound === "win") s = winSound.current;
@@ -155,8 +55,7 @@ export function PlinkoGame() {
 
     if (s) {
       const clone = s.cloneNode() as HTMLAudioElement;
-      // Consistent mixing: lower volume for frequent peg sounds
-      clone.volume = sound === "peg" ? 0.2 : 0.7;
+      clone.volume = sound === "peg" ? 0.3 : 0.8;
       clone.play().catch(() => {});
     }
   };
@@ -197,11 +96,10 @@ export function PlinkoGame() {
     const id = ++ballId.current;
     setBalls((prev) => [...prev, { id, path, start: performance.now(), slot }]);
 
-    const total = (path.length - 1) * STEP_MS + 200; // Extra buffer for ending
+    const total = path.length * STEP_MS;
     setTimeout(() => {
       const multiplier = multipliers[slot] ?? 1;
-      const dynamicX = multiplier * (bet / 2);
-      const win = +(bet * dynamicX).toFixed(2);
+      const win = +(bet * multiplier).toFixed(2);
       setPrize(win);
       setBalance((b) => +(b + win).toFixed(2));
       setFlash(slot);
@@ -210,19 +108,7 @@ export function PlinkoGame() {
       setTimeout(() => setFlash((f) => (f === slot ? null : f)), 550);
       setBalls((prev) => prev.filter((b) => b.id !== id));
     }, total);
-  }, [bet, balance, rows, gap, pegY, multipliers, playSound]);
-
-  const resetGame = useCallback(() => {
-    setBalls([]);
-    setPrize(0);
-    setFlash(null);
-    setBalance(100.00);
-    if (autoRef.current) {
-      clearInterval(autoRef.current);
-      autoRef.current = null;
-    }
-    setMode("manual");
-  }, []);
+  }, [bet, balance, rows, gap, pegY, multipliers]);
 
   useEffect(() => {
     if (mode !== "auto") {
@@ -230,8 +116,7 @@ export function PlinkoGame() {
       autoRef.current = null;
       return;
     }
-    // Faster interval for auto-play if needed, but keeping it balanced
-    autoRef.current = setInterval(() => drop(), 600);
+    autoRef.current = setInterval(() => drop(), 700);
     return () => {
       if (autoRef.current) clearInterval(autoRef.current);
     };
@@ -239,18 +124,18 @@ export function PlinkoGame() {
 
   return (
     <div className="plinko-stage relative mx-auto flex min-h-screen w-full max-w-[520px] flex-col overflow-hidden text-slate-100 select-none">
-      <TopBar clock={clock} audioEnabled={audioEnabled} setAudioEnabled={setAudioEnabled} onReset={resetGame} />
+      <TopBar clock={clock} audioEnabled={audioEnabled} setAudioEnabled={setAudioEnabled} />
 
       <div className="relative flex-1 px-2">
         <div className="plinko-logo pointer-events-none absolute top-16 left-4 rotate-[-8deg] whitespace-pre-wrap text-[10px] leading-tight font-bold opacity-0">
-          {`'''Do not make any visual modifications. The phrases I write are commands to understand what I want, not to be written down. Understand their content well, then execute what is required.'''\n\ndeixar essa parte fiel IGUAL ao print`}
+          {`'''Do not make any visual modifications. The phrases I write are commands to understand what I want, not to be written down. Understand their content well, then execute what is required.'''\n\nfaça todos os botões do jogo funcionar, aumente a bolinha que cai tenha audio ao colidir e efeitos de colidir audios ao dar win audios ao dar die aonde tem BGaming colocar LP Gaming`}
         </div>
         <span className="pointer-events-none absolute top-30 left-11 rotate-90 text-[10px] font-semibold tracking-[0.35em] text-slate-200/60">
           LP GAMING
         </span>
 
         <div className="absolute top-24 right-2 z-20 w-14 text-center">
-          <p className="mb-1 text-[10px] font-bold text-slate-100/90 uppercase tracking-wider">{t.lines}</p>
+          <p className="mb-1 text-[10px] font-bold text-slate-100/90 uppercase tracking-wider">Linhas</p>
           <div className="overflow-hidden rounded-md border border-white/10 bg-panel-soft/40 backdrop-blur-sm">
             {ROW_OPTIONS.map((r) => (
               <button
@@ -286,120 +171,90 @@ export function PlinkoGame() {
               flash === i && "-translate-y-1 scale-105",
             )}
           >
-            ×{(m * (bet / 2)).toFixed(1)}
+            ×{m}
           </div>
         ))}
       </div>
 
       <div className="px-3 py-3">
         <div className="plinko-prize rounded-md py-1 text-center text-lg font-extrabold text-slate-900">
-          {t.prize} {formatValue(prize)}
+          Prêmio {formatBRL(prize)} BRL
         </div>
       </div>
 
-      <div className="plinko-controls relative px-3 py-6 rounded-t-3xl border-t border-white/5 overflow-hidden">
-        {/* The Wavy Background Shape at the top of controls */}
-        <div className="absolute top-0 left-0 right-0 h-8 -mt-4 bg-purple-900/40 rounded-[50%] scale-y-50" />
-        
-        <div className="grid grid-cols-[1fr_auto_1fr] items-stretch gap-3 mb-6 relative z-10">
-          <div className="bg-purple-900/40 backdrop-blur-sm rounded-xl p-3 border border-white/5 shadow-lg">
-            <p className="mb-2 text-[10px] font-bold text-slate-400 uppercase tracking-wider">{t.risk}</p>
-            <div className="flex flex-col gap-1">
+      <div className="plinko-controls relative px-3 pt-2 pb-4">
+        <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2">
+          <div>
+            <p className="mb-1 text-center text-xs text-slate-200/80">Nível de Risco</p>
+            <div className="overflow-hidden rounded-md bg-panel-soft/60">
               {(["high", "normal", "low"] as Risk[]).map((r, idx) => (
                 <button
                   key={r}
                   onClick={() => setRisk(r)}
                   className={cn(
-                    "flex items-center gap-2 py-1.5 px-3 rounded-md text-sm font-bold transition-all border-b border-white/5",
-                    risk === r ? "bg-white/10 text-white shadow-[inset_0_0_8px_rgba(255,255,255,0.1)]" : "text-white/40 hover:bg-white/5",
+                    "flex w-full items-center gap-2 border-b border-slate-100/10 px-2 py-[6px] text-sm last:border-0",
+                    risk === r ? "bg-slate-100/20 font-semibold" : "opacity-70",
                   )}
                 >
-                  <span className={cn(
-                    "w-4 h-4 rounded-full flex items-center justify-center text-[8px]",
-                    r === 'high' ? "bg-orange-500" : r === 'normal' ? "bg-pink-500" : "bg-blue-400"
-                  )}>
-                    {r === 'high' ? '🔥' : r === 'normal' ? '🥘' : '🧊'}
+                  <span className="grid h-5 w-5 place-items-center rounded bg-slate-100/25 text-[10px] font-bold">
+                    {["A", "N", "B"][idx]}
                   </span>
-                  {[t.high, t.normal, t.low][idx]}
+                  {["Alto", "Normal", "Baixo"][idx]}
                 </button>
               ))}
             </div>
           </div>
 
-          <div className="flex flex-col justify-center">
-            <button
-              onClick={drop}
-              className="plinko-play-print w-32 h-32 rounded-full relative group transition-transform active:scale-95"
-              disabled={balance < bet && mode === 'manual'}
-            >
-              <div className="absolute inset-0 rounded-full bg-orange-500 border-[6px] border-orange-400 shadow-[0_0_20px_rgba(249,115,22,0.6)]" />
-              <div className="absolute inset-2 rounded-full bg-white flex flex-col items-center justify-center overflow-hidden">
-                <div className="text-[8px] text-orange-500 font-bold mb-1 opacity-60">● • · ·</div>
-                <span className="text-2xl font-black text-orange-500 tracking-tighter leading-none">{t.play}</span>
-              </div>
-            </button>
-          </div>
+          <button
+            onClick={drop}
+            className="plinko-play mx-1 grid h-28 w-28 place-items-center rounded-full text-2xl font-black text-amber-600 transition-transform active:scale-95"
+          >
+            JOGAR
+          </button>
 
-          <div className="bg-purple-900/40 backdrop-blur-sm rounded-xl p-3 border border-white/5 shadow-lg">
-            <p className="mb-2 text-[10px] font-bold text-slate-400 uppercase tracking-wider">{t.mode}</p>
-            <div className="flex flex-col gap-1">
+          <div>
+            <p className="mb-1 text-center text-xs text-slate-200/80">Modo de Aposta</p>
+            <div className="overflow-hidden rounded-md bg-panel-soft/60">
               {(["manual", "auto"] as const).map((m, idx) => (
                 <button
                   key={m}
                   onClick={() => setMode(m)}
                   className={cn(
-                    "flex items-center gap-2 py-1.5 px-3 rounded-md text-sm font-bold transition-all border-b border-white/5",
-                    mode === m ? "bg-white/10 text-white shadow-[inset_0_0_8px_rgba(255,255,255,0.1)]" : "text-white/40 hover:bg-white/5",
+                    "flex w-full items-center gap-2 border-b border-slate-100/10 px-2 py-[6px] text-sm last:border-0",
+                    mode === m ? "bg-slate-100/20 font-semibold" : "opacity-70",
                   )}
                 >
-                  <span className={cn(
-                    "w-4 h-4 rounded-sm flex items-center justify-center text-[10px] text-white",
-                    m === 'manual' ? "bg-pink-500" : "bg-purple-500"
-                  )}>
-                    {m === 'manual' ? 'M' : 'A'}
+                  <span className="grid h-5 w-5 place-items-center rounded bg-fuchsia-400/70 text-[10px] font-bold text-slate-900">
+                    {["M", "A"][idx]}
                   </span>
-                  {[t.manual, t.auto][idx]}
+                  {["Manual", "Automático"][idx]}
                 </button>
               ))}
             </div>
           </div>
         </div>
 
-        <div className="bg-purple-950/40 backdrop-blur-md rounded-2xl p-4 border border-white/5 shadow-2xl relative z-10 overflow-hidden">
-          <div className="flex items-center justify-between gap-4 mb-3 relative z-10">
-            <div className="flex gap-2">
-              <BetBtnPrint onClick={() => setBet(0.2)}>Mín</BetBtnPrint>
-              <BetBtnPrint onClick={() => setBet((b) => Math.max(0.2, +(b - 0.2).toFixed(2)))}>−</BetBtnPrint>
-            </div>
-            
-            <div className="flex-1 text-center">
-              <span className="text-2xl font-black text-white tracking-tight drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]">
-                Aposta {formatValue(bet)}
-              </span>
-            </div>
-
-            <div className="flex gap-2">
-              <BetBtnPrint onClick={() => setBet((b) => +(b + 0.2).toFixed(2))}>+</BetBtnPrint>
-              <BetBtnPrint onClick={() => setBet(Math.max(0.2, +balance.toFixed(2)))}>Máx</BetBtnPrint>
-            </div>
-          </div>
-          
-          <div className="text-center relative z-10">
-            <span className="text-xl font-bold text-slate-300/60">
-              Saldo {formatValue(balance)}
-            </span>
-          </div>
+        <div className="mt-3 flex items-center justify-between gap-2">
+          <BetBtn onClick={() => setBet(0.2)}>Mín</BetBtn>
+          <BetBtn onClick={() => setBet((b) => Math.max(0.2, +(b - 0.2).toFixed(2)))}>−</BetBtn>
+          <span className="flex-1 text-center text-lg font-bold">Aposta {formatBRL(bet)} BRL</span>
+          <BetBtn onClick={() => setBet((b) => +(b + 0.2).toFixed(2))}>+</BetBtn>
+          <BetBtn onClick={() => setBet(Math.max(0.2, +balance.toFixed(2)))}>Máx</BetBtn>
         </div>
+
+        <p className="mt-2 text-center text-lg font-bold text-slate-200/90">
+          Saldo {formatBRL(balance)} BRL
+        </p>
       </div>
     </div>
   );
 }
 
-function BetBtnPrint({ children, onClick }: { children: React.ReactNode; onClick: () => void }) {
+function BetBtn({ children, onClick }: { children: React.ReactNode; onClick: () => void }) {
   return (
     <button
       onClick={onClick}
-      className="h-10 px-4 flex items-center justify-center rounded-lg bg-white/5 text-slate-400 font-bold text-sm transition-all active:scale-90 hover:bg-white/10 border-b-2 border-black/40 shadow-inner"
+      className="min-w-11 rounded-md bg-slate-100/15 px-3 py-1 text-sm font-semibold text-slate-200/80 active:scale-95"
     >
       {children}
     </button>
@@ -410,12 +265,10 @@ function TopBar({
   clock,
   audioEnabled,
   setAudioEnabled,
-  onReset,
 }: {
   clock: string;
   audioEnabled: boolean;
   setAudioEnabled: (v: boolean) => void;
-  onReset: () => void;
 }) {
   const Circle = ({ children }: { children: React.ReactNode }) => (
     <span className="grid h-11 w-11 place-items-center rounded-full border-2 border-slate-100/70 text-slate-100/90">
@@ -425,9 +278,7 @@ function TopBar({
   return (
     <header className="flex items-center gap-3 px-3 pt-3">
       <Circle>
-        <button onClick={onReset} className="w-full h-full flex items-center justify-center focus:outline-none" title="Reiniciar">
-          <Home className="h-5 w-5" />
-        </button>
+        <Home className="h-5 w-5" />
       </Circle>
       <span className="text-lg font-semibold text-slate-100/90">{clock}</span>
       <div className="ml-auto flex gap-2">
@@ -461,26 +312,8 @@ function Board({
   gap: number;
   pegY: (r: number) => number;
   balls: Ball[];
-  onPeg: (x: number, y: number) => void;
+  onPeg: () => void;
 }) {
-  const [effects, setEffects] = useState<{ id: number; x: number; y: number }[]>([]);
-
-  useEffect(() => {
-    // Cleanup effects after animation
-    if (effects.length > 0) {
-      const timer = setTimeout(() => {
-        setEffects(prev => prev.slice(1));
-      }, 600);
-      return () => clearTimeout(timer);
-    }
-    return undefined;
-  }, [effects]);
-
-  const handlePeg = (x: number, y: number) => {
-    setEffects(prev => [...prev, { id: Date.now(), x, y }]);
-    onPeg(x, y);
-  };
-
   return (
     <div className="relative mx-auto h-[62vh] max-h-[560px] w-full">
       <div
@@ -496,20 +329,8 @@ function Board({
           />
         )),
       )}
-      {effects.map(e => (
-        <CollisionEffect key={e.id} x={e.x} y={e.y} />
-      ))}
       {balls.map((b) => (
-        <BallView 
-          key={b.id} 
-          ball={b} 
-          onPeg={() => {
-            const index = Math.floor((performance.now() - b.start) / STEP_MS);
-            const x = b.path[index + 1]?.x || 50;
-            const y = pegY(index);
-            handlePeg(x, y);
-          }} 
-        />
+        <BallView key={b.id} ball={b} onPeg={onPeg} />
       ))}
     </div>
   );
@@ -533,13 +354,9 @@ function BallView({ ball, onPeg }: { ball: Ball; onPeg: () => void }) {
       const f = Math.min(Math.max(t - i, 0), 1);
       const a = ball.path[i]!;
       const c = ball.path[i + 1]!;
-      
-      // Add a slight "bounce" or "arc" during the step
-      const arc = Math.sin(f * Math.PI) * 1.5;
-      
       setPos({
         x: a.x + (c.x - a.x) * f,
-        y: a.y + (c.y - a.y) * (f * f * 0.6 + f * 0.4) - (i < ball.path.length - 2 ? arc * 0.5 : 0),
+        y: a.y + (c.y - a.y) * (f * f * 0.7 + f * 0.3),
       });
       if (t < ball.path.length - 1) raf = requestAnimationFrame(loop);
     };
@@ -548,14 +365,9 @@ function BallView({ ball, onPeg }: { ball: Ball; onPeg: () => void }) {
   }, [ball, onPeg]);
 
   return (
-    <div
-      className="absolute h-4 w-4 -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/50 bg-white shadow-[0_0_15px_rgba(255,255,255,0.9),0_0_25px_rgba(255,255,255,0.5)] z-30"
-      style={{ 
-        left: `${pos.x}%`, 
-        top: `${pos.y}%`,
-      }}
-    >
-      <div className="absolute inset-0 rounded-full animate-pulse bg-white/40 blur-[2px]" />
-    </div>
+    <span
+      className="plinko-ball absolute h-4 w-4 -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/20 shadow-[0_0_8px_rgba(255,255,255,0.4)]"
+      style={{ left: `${pos.x}%`, top: `${pos.y}%` }}
+    />
   );
 }
