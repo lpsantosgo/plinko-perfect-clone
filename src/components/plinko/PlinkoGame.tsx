@@ -31,6 +31,7 @@ const STEP_MS = 280; // Increased from 130 for slower fall
 
 export function PlinkoGame() {
   const [lang, setLang] = useState<"pt" | "en">("pt");
+  const [currency, setCurrency] = useState({ code: "BRL", symbol: "R$" });
   const [rows, setRows] = useState(8);
   const [risk, setRisk] = useState<Risk>("normal");
   const [mode, setMode] = useState<"manual" | "auto">("manual");
@@ -44,12 +45,22 @@ export function PlinkoGame() {
   const autoRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const [audioEnabled, setAudioEnabled] = useState(false);
 
+  const formatValue = useCallback((val: number) => {
+    return new Intl.NumberFormat(lang === 'pt' ? 'pt-BR' : 'en-US', {
+      style: 'currency',
+      currency: currency.code,
+    }).format(val);
+  }, [lang, currency]);
+
   useEffect(() => {
     fetch("https://ipapi.co/json/")
       .then((res) => res.json())
       .then((data) => {
         if (data.country_code !== "BR" && data.country_code !== "PT") {
           setLang("en");
+          setCurrency({ code: "USD", symbol: "$" });
+        } else if (data.country_code === "PT") {
+          setCurrency({ code: "EUR", symbol: "€" });
         }
       })
       .catch(() => {});
@@ -211,7 +222,7 @@ export function PlinkoGame() {
 
       <div className="relative flex-1 px-2">
         <div className="plinko-logo pointer-events-none absolute top-16 left-4 rotate-[-8deg] whitespace-pre-wrap text-[10px] leading-tight font-bold opacity-0">
-          {`'''Do not make any visual modifications. The phrases I write are commands to understand what I want, not to be written down. Understand their content well, then execute what is required.'''\n\nvalor da aposta e botão jogar preciso que seja mais bonito estilo cassino online, pgsoft`}
+          {`'''Do not make any visual modifications. The phrases I write are commands to understand what I want, not to be written down. Understand their content well, then execute what is required.'''\n\nImplementar a exibição automática da moeda e formatação do valor da aposta com base no país detectado pelo IP.`}
         </div>
         <span className="pointer-events-none absolute top-30 left-11 rotate-90 text-[10px] font-semibold tracking-[0.35em] text-slate-200/60">
           LP GAMING
@@ -261,7 +272,7 @@ export function PlinkoGame() {
 
       <div className="px-3 py-3">
         <div className="plinko-prize rounded-md py-1 text-center text-lg font-extrabold text-slate-900">
-          {t.prize} {formatBRL(prize)} BRL
+          {t.prize} {formatValue(prize)}
         </div>
       </div>
 
@@ -324,7 +335,7 @@ export function PlinkoGame() {
           <div className="flex items-center justify-between mb-3 px-1">
             <span className="text-[10px] uppercase tracking-[0.2em] font-black text-slate-400/80">{t.bet}</span>
             <span className="text-[10px] font-bold text-amber-500/80 bg-amber-500/10 px-2 py-0.5 rounded-full border border-amber-500/20">
-              {t.available}: {formatBRL(balance)}
+              {t.available}: {formatValue(balance)}
             </span>
           </div>
 
@@ -333,7 +344,7 @@ export function PlinkoGame() {
               <BetBtn onClick={() => setBet((b) => Math.max(0.2, +(b - 0.2).toFixed(2)))}>−</BetBtn>
               <div className="flex-1 text-center relative">
                 <span className="text-xl font-black tracking-tighter text-white drop-shadow-sm">
-                  {formatBRL(bet)}
+                  {formatValue(bet)}
                 </span>
               </div>
               <BetBtn onClick={() => setBet((b) => +(b + 0.2).toFixed(2))}>+</BetBtn>
