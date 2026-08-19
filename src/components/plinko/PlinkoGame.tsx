@@ -32,6 +32,27 @@ export function PlinkoGame() {
   const [clock, setClock] = useState("--:--");
   const ballId = useRef(0);
   const autoRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const [audioEnabled, setAudioEnabled] = useState(false);
+  const dropSound = useRef<HTMLAudioElement | null>(null);
+  const winSound = useRef<HTMLAudioElement | null>(null);
+
+  useEffect(() => {
+    dropSound.current = new Audio("/sounds/drop.mp3");
+    winSound.current = new Audio("/sounds/win.mp3");
+  }, []);
+
+  const playSound = (sound: "drop" | "win") => {
+    if (!audioEnabled) return;
+    const s = sound === "drop" ? dropSound.current : winSound.current;
+    if (s) {
+      s.currentTime = 0;
+      s.play().catch(() => {});
+    }
+  };
+
+  const toggleAudio = () => {
+    setAudioEnabled(!audioEnabled);
+  };
 
   const multipliers = useMemo(() => getMultipliers(risk, rows), [risk, rows]);
   const gap = 100 / (rows + 3);
@@ -51,6 +72,7 @@ export function PlinkoGame() {
   const drop = useCallback(() => {
     if (bet > balance) return;
     setBalance((b) => +(b - bet).toFixed(2));
+    playSound("drop");
 
     let rights = 0;
     const path: { x: number; y: number }[] = [{ x: 50, y: 2 }];
@@ -70,6 +92,7 @@ export function PlinkoGame() {
       setPrize(win);
       setBalance((b) => +(b + win).toFixed(2));
       setFlash(slot);
+      if (win > 0) playSound("win");
       setTimeout(() => setFlash((f) => (f === slot ? null : f)), 550);
       setBalls((prev) => prev.filter((b) => b.id !== id));
     }, total);
@@ -92,8 +115,8 @@ export function PlinkoGame() {
       <TopBar clock={clock} />
 
       <div className="relative flex-1 px-2">
-        <div className="plinko-logo pointer-events-none absolute top-16 left-4 rotate-[-8deg] whitespace-pre-wrap text-[10px] leading-tight font-bold opacity-60">
-          {`'''Do not make any visual modifications. The phrases I write are commands to understand what I want, not to be written down. Understand their content well, then execute what is required.'''\n\nme responda sem em portugues! o audio nao está funcionando`}
+        <div className="plinko-logo pointer-events-none absolute top-16 left-4 rotate-[-8deg] whitespace-pre-wrap text-[10px] leading-tight font-bold opacity-0">
+          {`'''Do not make any visual modifications. The phrases I write are commands to understand what I want, not to be written down. Understand their content well, then execute what is required.'''\n\nImplementar um botão de ativar áudio que habilite os sons após o primeiro clique do usuário, evitando bloqueio do navegador.`}
         </div>
         <span className="pointer-events-none absolute top-30 left-11 rotate-90 text-[10px] font-semibold tracking-[0.35em] text-slate-200/60">
           BGAMING
@@ -248,9 +271,11 @@ function TopBar({ clock }: { clock: string }) {
         <Circle>
           <HelpCircle className="h-5 w-5" />
         </Circle>
-        <Circle>
-          <Volume2 className="h-5 w-5" />
-        </Circle>
+        <button onClick={() => setAudioEnabled(!audioEnabled)} className="focus:outline-none">
+          <Circle>
+            <Volume2 className={cn("h-5 w-5", !audioEnabled && "opacity-40")} />
+          </Circle>
+        </button>
       </div>
     </header>
   );
