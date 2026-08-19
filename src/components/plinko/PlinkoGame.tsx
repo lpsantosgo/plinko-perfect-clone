@@ -211,7 +211,7 @@ export function PlinkoGame() {
 
       <div className="relative flex-1 px-2">
         <div className="plinko-logo pointer-events-none absolute top-16 left-4 rotate-[-8deg] whitespace-pre-wrap text-[10px] leading-tight font-bold opacity-0">
-          {`'''Do not make any visual modifications. The phrases I write are commands to understand what I want, not to be written down. Understand their content well, then execute what is required.'''\n\ndetectar idioma de acordo com o ip do jogador, exemplo se o ip for do estados unidos mudar o idioma automaticamente para ingles, se for do brasil pt-br se for do portugal pt, deixe o botão de apostar igual era aquela linda bola`}
+          {`'''Do not make any visual modifications. The phrases I write are commands to understand what I want, not to be written down. Understand their content well, then execute what is required.'''\n\nvalor da aposta e botão jogar preciso que seja mais bonito estilo cassino online, pgsoft`}
         </div>
         <span className="pointer-events-none absolute top-30 left-11 rotate-90 text-[10px] font-semibold tracking-[0.35em] text-slate-200/60">
           LP GAMING
@@ -290,11 +290,10 @@ export function PlinkoGame() {
 
           <button
             onClick={drop}
-            className="plinko-play mx-1 grid h-28 w-28 place-items-center rounded-full text-2xl font-black text-amber-600 transition-transform active:scale-95 shadow-2xl relative overflow-hidden"
+            className="plinko-play mx-2 grid h-32 w-32 place-items-center rounded-full text-3xl font-black text-amber-950 tracking-tighter shadow-2xl relative overflow-hidden z-30"
             disabled={balance < bet && mode === 'manual'}
           >
-            <div className="absolute inset-0 bg-white/10 opacity-0 hover:opacity-100 transition-opacity" />
-            <span className="relative z-10">{t.play}</span>
+            <span className="relative z-10 drop-shadow-[0_1px_1px_rgba(255,255,255,0.5)]">{t.play}</span>
           </button>
 
           <div>
@@ -319,20 +318,28 @@ export function PlinkoGame() {
           </div>
         </div>
 
-        <div className="mt-4 bg-slate-950/40 rounded-xl p-3 ring-1 ring-white/5 shadow-inner">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-[10px] uppercase tracking-wider font-bold text-slate-400">{t.bet}</span>
-            <span className="text-xs font-mono font-bold text-slate-500">{t.available}: {formatBRL(balance)}</span>
+        <div className="mt-6 bet-input-container rounded-2xl p-4 ring-1 ring-white/10 relative overflow-hidden">
+          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-amber-500/40 to-transparent" />
+          
+          <div className="flex items-center justify-between mb-3 px-1">
+            <span className="text-[10px] uppercase tracking-[0.2em] font-black text-slate-400/80">{t.bet}</span>
+            <span className="text-[10px] font-bold text-amber-500/80 bg-amber-500/10 px-2 py-0.5 rounded-full border border-amber-500/20">
+              {t.available}: {formatBRL(balance)}
+            </span>
           </div>
-          <div className="flex items-center gap-2">
-            <div className="flex flex-1 items-center bg-slate-900/60 rounded-lg ring-1 ring-white/10 p-1">
+
+          <div className="flex items-center gap-3">
+            <div className="flex flex-1 items-center bg-black/40 rounded-xl ring-1 ring-white/5 p-1.5 shadow-inner">
               <BetBtn onClick={() => setBet((b) => Math.max(0.2, +(b - 0.2).toFixed(2)))}>−</BetBtn>
-              <span className="flex-1 text-center text-lg font-black tracking-tighter text-white/90">
-                {formatBRL(bet)}
-              </span>
+              <div className="flex-1 text-center relative">
+                <span className="text-xl font-black tracking-tighter text-white drop-shadow-sm">
+                  {formatBRL(bet)}
+                </span>
+              </div>
               <BetBtn onClick={() => setBet((b) => +(b + 0.2).toFixed(2))}>+</BetBtn>
             </div>
-            <div className="flex gap-1.5">
+            
+            <div className="flex flex-col gap-1.5">
               <QuickBetBtn onClick={() => setBet(0.2)}>MIN</QuickBetBtn>
               <QuickBetBtn onClick={() => setBet(Math.max(0.2, +balance.toFixed(2)))}>MAX</QuickBetBtn>
             </div>
@@ -358,7 +365,7 @@ function QuickBetBtn({ children, onClick }: { children: React.ReactNode; onClick
   return (
     <button
       onClick={onClick}
-      className="h-11 px-3 rounded-lg bg-slate-900/60 ring-1 ring-white/10 text-[10px] font-black text-slate-400 hover:bg-white/5 hover:text-white transition-all active:scale-95 shadow-sm"
+      className="quick-bet-btn h-6 px-3 rounded-md ring-1 ring-white/5 text-[9px] font-black text-slate-400 active:scale-95 shadow-sm uppercase tracking-wider"
     >
       {children}
     </button>
