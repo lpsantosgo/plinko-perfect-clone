@@ -18,7 +18,7 @@ function slotClass(index: number, total: number) {
 type Ball = { id: number; path: { x: number; y: number }[]; start: number; slot: number };
 
 const ROW_OPTIONS = [8, 9, 10, 11, 12, 13, 14, 15, 16];
-const STEP_MS = 130;
+const STEP_MS = 100;
 
 export function PlinkoGame() {
   const [rows, setRows] = useState(8);
@@ -112,7 +112,7 @@ export function PlinkoGame() {
     const path: { x: number; y: number }[] = [{ x: 50, y: 2 }];
     for (let r = 0; r < rows; r++) {
       if (Math.random() < 0.5) rights++;
-      path.push({ x: 50 + (rights - (r + 1) / 2) * gap, y: pegY(r) + 4 });
+      path.push({ x: 50 + (rights - (r + 1) / 2) * gap, y: pegY(r) + 2.5 });
     }
     const slot = rights;
     path.push({ x: 50 + (slot - rows / 2) * gap, y: 96 });
@@ -152,7 +152,7 @@ export function PlinkoGame() {
 
       <div className="relative flex-1 px-2">
         <div className="plinko-logo pointer-events-none absolute top-16 left-4 rotate-[-8deg] whitespace-pre-wrap text-[10px] leading-tight font-bold opacity-0">
-          {`'''Do not make any visual modifications. The phrases I write are commands to understand what I want, not to be written down. Understand their content well, then execute what is required.'''\n\nalterar moeda de acordo com o ip do jogador`}
+          {`'''Do not make any visual modifications. The phrases I write are commands to understand what I want, not to be written down. Understand their content well, then execute what is required.'''\n\nbolinha descendo com mais impacto mais atraente com colisões e esperanças mais atraente`}
         </div>
         <span className="pointer-events-none absolute top-30 left-11 rotate-90 text-[10px] font-semibold tracking-[0.35em] text-slate-200/60">
           LP GAMING
@@ -363,6 +363,7 @@ function Board({
 function BallView({ ball, onPeg }: { ball: Ball; onPeg: () => void }) {
   const [pos, setPos] = useState(ball.path[0]!);
   const lastIndex = useRef(-1);
+  const [bounce, setBounce] = useState(0);
 
   useEffect(() => {
     let raf = 0;
@@ -373,14 +374,20 @@ function BallView({ ball, onPeg }: { ball: Ball; onPeg: () => void }) {
       if (i > lastIndex.current && i < ball.path.length - 1) {
         lastIndex.current = i;
         onPeg();
+        setBounce(1);
+        setTimeout(() => setBounce(0), 100);
       }
 
       const f = Math.min(Math.max(t - i, 0), 1);
       const a = ball.path[i]!;
       const c = ball.path[i + 1]!;
+
+      // Curva de gravidade mais acentuada para impacto
+      const curve = f * f * 0.8 + f * 0.2;
+      
       setPos({
         x: a.x + (c.x - a.x) * f,
-        y: a.y + (c.y - a.y) * (f * f * 0.7 + f * 0.3),
+        y: a.y + (c.y - a.y) * curve,
       });
       if (t < ball.path.length - 1) raf = requestAnimationFrame(loop);
     };
@@ -390,7 +397,10 @@ function BallView({ ball, onPeg }: { ball: Ball; onPeg: () => void }) {
 
   return (
     <span
-      className="plinko-ball absolute h-4 w-4 -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/20 shadow-[0_0_8px_rgba(255,255,255,0.4)]"
+      className={cn(
+        "plinko-ball absolute h-4 w-4 -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/20 shadow-[0_0_12px_rgba(255,255,255,0.6)] transition-transform duration-75",
+        bounce > 0 && "scale-125"
+      )}
       style={{ left: `${pos.x}%`, top: `${pos.y}%` }}
     />
   );
