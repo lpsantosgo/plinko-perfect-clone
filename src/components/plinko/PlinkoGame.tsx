@@ -243,7 +243,7 @@ export function PlinkoGame() {
 
       <div className="relative flex-1 px-2">
         <div className="plinko-logo pointer-events-none absolute top-16 left-4 rotate-[-8deg] whitespace-pre-wrap text-[10px] leading-tight font-bold opacity-0">
-          {`'''Do not make any visual modifications. The phrases I write are commands to understand what I want, not to be written down. Understand their content well, then execute what is required.'''\n\ndeixar audio ativado!`}
+          {`'''Do not make any visual modifications. The phrases I write are commands to understand what I want, not to be written down. Understand their content well, then execute what is required.'''\n\ndeixar essa parte fiel IGUAL ao print`}
         </div>
         <span className="pointer-events-none absolute top-30 left-11 rotate-90 text-[10px] font-semibold tracking-[0.35em] text-slate-200/60">
           LP GAMING
@@ -297,18 +297,21 @@ export function PlinkoGame() {
         </div>
       </div>
 
-      <div className="plinko-controls relative px-3 py-6 bg-purple-900/30 backdrop-blur-md rounded-t-3xl border-t border-white/10">
-        <div className="grid grid-cols-[1fr_auto_1fr] items-stretch gap-4 mb-6">
-          <div className="bg-purple-900/40 rounded-xl p-3 border border-white/5">
-            <p className="mb-3 text-xs font-medium text-slate-300/80">{t.risk}</p>
-            <div className="flex flex-col gap-2">
+      <div className="plinko-controls relative px-3 py-6 rounded-t-3xl border-t border-white/5 overflow-hidden">
+        {/* The Wavy Background Shape at the top of controls */}
+        <div className="absolute top-0 left-0 right-0 h-8 -mt-4 bg-purple-900/40 rounded-[50%] scale-y-50" />
+        
+        <div className="grid grid-cols-[1fr_auto_1fr] items-stretch gap-3 mb-6 relative z-10">
+          <div className="bg-purple-900/40 backdrop-blur-sm rounded-xl p-3 border border-white/5 shadow-lg">
+            <p className="mb-2 text-[10px] font-bold text-slate-400 uppercase tracking-wider">{t.risk}</p>
+            <div className="flex flex-col gap-1">
               {(["high", "normal", "low"] as Risk[]).map((r, idx) => (
                 <button
                   key={r}
                   onClick={() => setRisk(r)}
                   className={cn(
-                    "flex items-center gap-2 py-2 px-3 rounded-lg text-sm font-bold transition-all border-b border-white/5",
-                    risk === r ? "bg-white/20 text-white" : "text-white/50 hover:bg-white/5",
+                    "flex items-center gap-2 py-1.5 px-3 rounded-md text-sm font-bold transition-all border-b border-white/5",
+                    risk === r ? "bg-white/10 text-white shadow-[inset_0_0_8px_rgba(255,255,255,0.1)]" : "text-white/40 hover:bg-white/5",
                   )}
                 >
                   <span className={cn(
@@ -337,16 +340,16 @@ export function PlinkoGame() {
             </button>
           </div>
 
-          <div className="bg-purple-900/40 rounded-xl p-3 border border-white/5">
-            <p className="mb-3 text-xs font-medium text-slate-300/80">{t.mode}</p>
-            <div className="flex flex-col gap-2">
+          <div className="bg-purple-900/40 backdrop-blur-sm rounded-xl p-3 border border-white/5 shadow-lg">
+            <p className="mb-2 text-[10px] font-bold text-slate-400 uppercase tracking-wider">{t.mode}</p>
+            <div className="flex flex-col gap-1">
               {(["manual", "auto"] as const).map((m, idx) => (
                 <button
                   key={m}
                   onClick={() => setMode(m)}
                   className={cn(
-                    "flex items-center gap-2 py-2 px-3 rounded-lg text-sm font-bold transition-all border-b border-white/5",
-                    mode === m ? "bg-white/20 text-white" : "text-white/50 hover:bg-white/5",
+                    "flex items-center gap-2 py-1.5 px-3 rounded-md text-sm font-bold transition-all border-b border-white/5",
+                    mode === m ? "bg-white/10 text-white shadow-[inset_0_0_8px_rgba(255,255,255,0.1)]" : "text-white/40 hover:bg-white/5",
                   )}
                 >
                   <span className={cn(
@@ -362,27 +365,27 @@ export function PlinkoGame() {
           </div>
         </div>
 
-        <div className="bg-purple-950/60 rounded-2xl p-4 border border-white/10 shadow-2xl">
-          <div className="flex items-center justify-between gap-4 mb-2">
-            <div className="flex gap-1">
+        <div className="bg-purple-950/40 backdrop-blur-md rounded-2xl p-4 border border-white/5 shadow-2xl relative z-10 overflow-hidden">
+          <div className="flex items-center justify-between gap-4 mb-3 relative z-10">
+            <div className="flex gap-2">
               <BetBtnPrint onClick={() => setBet(0.2)}>Mín</BetBtnPrint>
               <BetBtnPrint onClick={() => setBet((b) => Math.max(0.2, +(b - 0.2).toFixed(2)))}>−</BetBtnPrint>
             </div>
             
             <div className="flex-1 text-center">
-              <span className="text-xl font-black text-white tracking-tight drop-shadow-lg">
+              <span className="text-2xl font-black text-white tracking-tight drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]">
                 Aposta {formatValue(bet)}
               </span>
             </div>
 
-            <div className="flex gap-1">
+            <div className="flex gap-2">
               <BetBtnPrint onClick={() => setBet((b) => +(b + 0.2).toFixed(2))}>+</BetBtnPrint>
               <BetBtnPrint onClick={() => setBet(Math.max(0.2, +balance.toFixed(2)))}>Máx</BetBtnPrint>
             </div>
           </div>
           
-          <div className="text-center">
-            <span className="text-lg font-bold text-slate-400/80">
+          <div className="text-center relative z-10">
+            <span className="text-xl font-bold text-slate-300/60">
               Saldo {formatValue(balance)}
             </span>
           </div>
@@ -396,7 +399,7 @@ function BetBtnPrint({ children, onClick }: { children: React.ReactNode; onClick
   return (
     <button
       onClick={onClick}
-      className="h-10 px-3 flex items-center justify-center rounded-lg bg-white/10 text-slate-300 font-medium text-sm transition-all active:scale-90 hover:bg-white/20 border-b-2 border-black/20"
+      className="h-10 px-4 flex items-center justify-center rounded-lg bg-white/5 text-slate-400 font-bold text-sm transition-all active:scale-90 hover:bg-white/10 border-b-2 border-black/40 shadow-inner"
     >
       {children}
     </button>
