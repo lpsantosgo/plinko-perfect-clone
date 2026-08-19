@@ -545,12 +545,14 @@ function BallView({ ball, onPeg }: { ball: Ball; onPeg: () => void }) {
   }, [ball, onPeg]);
 
   return (
-    <span
-      className="plinko-ball absolute h-4 w-4 -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/30 shadow-[0_0_12px_rgba(255,255,255,0.6)] z-30 transition-[transform] duration-200"
+    <div
+      className="absolute h-4 w-4 -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/50 bg-white shadow-[0_0_15px_rgba(255,255,255,0.9),0_0_25px_rgba(255,255,255,0.5)] z-30"
       style={{ 
         left: `${pos.x}%`, 
         top: `${pos.y}%`,
       }}
-    />
+    >
+      <div className="absolute inset-0 rounded-full animate-pulse bg-white/40 blur-[2px]" />
+    </div>
   );
 }
