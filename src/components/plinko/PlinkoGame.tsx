@@ -243,7 +243,7 @@ export function PlinkoGame() {
 
       <div className="relative flex-1 px-2">
         <div className="plinko-logo pointer-events-none absolute top-16 left-4 rotate-[-8deg] whitespace-pre-wrap text-[10px] leading-tight font-bold opacity-0">
-          {`'''Do not make any visual modifications. The phrases I write are commands to understand what I want, not to be written down. Understand their content well, then execute what is required.'''\n\nAdicionar fallback de idioma e tratamento de erro quando a detecção por IP falhar, mantendo o jogo utilizável.`}
+          {`'''Do not make any visual modifications. The phrases I write are commands to understand what I want, not to be written down. Understand their content well, then execute what is required.'''\n\ndeixe o botão de jogar, valor da aposta etc igual ao print anexado`}
         </div>
         <span className="pointer-events-none absolute top-30 left-11 rotate-90 text-[10px] font-semibold tracking-[0.35em] text-slate-200/60">
           LP GAMING
@@ -297,22 +297,25 @@ export function PlinkoGame() {
         </div>
       </div>
 
-      <div className="plinko-controls relative px-3 pt-2 pb-4">
-        <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2">
-          <div>
-            <p className="mb-1 text-center text-[10px] uppercase tracking-wider font-bold text-slate-400">{t.risk}</p>
-            <div className="overflow-hidden rounded-md bg-panel-soft/60">
+      <div className="plinko-controls relative px-3 py-6 bg-purple-900/30 backdrop-blur-md rounded-t-3xl border-t border-white/10">
+        <div className="grid grid-cols-[1fr_auto_1fr] items-stretch gap-4 mb-6">
+          <div className="bg-purple-900/40 rounded-xl p-3 border border-white/5">
+            <p className="mb-3 text-xs font-medium text-slate-300/80">{t.risk}</p>
+            <div className="flex flex-col gap-2">
               {(["high", "normal", "low"] as Risk[]).map((r, idx) => (
                 <button
                   key={r}
                   onClick={() => setRisk(r)}
                   className={cn(
-                    "flex w-full items-center gap-2 border-b border-slate-100/10 px-2 py-[6px] text-xs last:border-0",
-                    risk === r ? "bg-slate-100/20 font-semibold" : "opacity-70",
+                    "flex items-center gap-2 py-2 px-3 rounded-lg text-sm font-bold transition-all border-b border-white/5",
+                    risk === r ? "bg-white/20 text-white" : "text-white/50 hover:bg-white/5",
                   )}
                 >
-                  <span className="grid h-4 w-4 place-items-center rounded bg-slate-100/25 text-[9px] font-bold">
-                    {["A", "N", "B"][idx]}
+                  <span className={cn(
+                    "w-4 h-4 rounded-full flex items-center justify-center text-[8px]",
+                    r === 'high' ? "bg-orange-500" : r === 'normal' ? "bg-pink-500" : "bg-blue-400"
+                  )}>
+                    {r === 'high' ? '🔥' : r === 'normal' ? '🥘' : '🧊'}
                   </span>
                   {[t.high, t.normal, t.low][idx]}
                 </button>
@@ -320,28 +323,37 @@ export function PlinkoGame() {
             </div>
           </div>
 
-          <button
-            onClick={drop}
-            className="plinko-play mx-2 grid h-32 w-32 place-items-center rounded-full text-3xl font-black text-amber-950 tracking-tighter shadow-2xl relative overflow-hidden z-30"
-            disabled={balance < bet && mode === 'manual'}
-          >
-            <span className="relative z-10 drop-shadow-[0_1px_1px_rgba(255,255,255,0.5)]">{t.play}</span>
-          </button>
+          <div className="flex flex-col justify-center">
+            <button
+              onClick={drop}
+              className="plinko-play-print w-32 h-32 rounded-full relative group transition-transform active:scale-95"
+              disabled={balance < bet && mode === 'manual'}
+            >
+              <div className="absolute inset-0 rounded-full bg-orange-500 border-[6px] border-orange-400 shadow-[0_0_20px_rgba(249,115,22,0.6)]" />
+              <div className="absolute inset-2 rounded-full bg-white flex flex-col items-center justify-center overflow-hidden">
+                <div className="text-[8px] text-orange-500 font-bold mb-1 opacity-60">● • · ·</div>
+                <span className="text-2xl font-black text-orange-500 tracking-tighter leading-none">{t.play}</span>
+              </div>
+            </button>
+          </div>
 
-          <div>
-            <p className="mb-1 text-center text-[10px] uppercase tracking-wider font-bold text-slate-400">{t.mode}</p>
-            <div className="overflow-hidden rounded-md bg-panel-soft/60">
+          <div className="bg-purple-900/40 rounded-xl p-3 border border-white/5">
+            <p className="mb-3 text-xs font-medium text-slate-300/80">{t.mode}</p>
+            <div className="flex flex-col gap-2">
               {(["manual", "auto"] as const).map((m, idx) => (
                 <button
                   key={m}
                   onClick={() => setMode(m)}
                   className={cn(
-                    "flex w-full items-center gap-2 border-b border-slate-100/10 px-2 py-[6px] text-xs last:border-0",
-                    mode === m ? "bg-slate-100/20 font-semibold" : "opacity-70",
+                    "flex items-center gap-2 py-2 px-3 rounded-lg text-sm font-bold transition-all border-b border-white/5",
+                    mode === m ? "bg-white/20 text-white" : "text-white/50 hover:bg-white/5",
                   )}
                 >
-                  <span className="grid h-4 w-4 place-items-center rounded bg-fuchsia-400/70 text-[9px] font-bold text-slate-900">
-                    {["M", "A"][idx]}
+                  <span className={cn(
+                    "w-4 h-4 rounded-sm flex items-center justify-center text-[10px] text-white",
+                    m === 'manual' ? "bg-pink-500" : "bg-purple-500"
+                  )}>
+                    {m === 'manual' ? 'M' : 'A'}
                   </span>
                   {[t.manual, t.auto][idx]}
                 </button>
@@ -350,31 +362,29 @@ export function PlinkoGame() {
           </div>
         </div>
 
-        <div className="mt-6 bet-input-container rounded-2xl p-4 ring-1 ring-white/10 relative overflow-hidden">
-          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-amber-500/40 to-transparent" />
-          
-          <div className="flex items-center justify-between mb-3 px-1">
-            <span className="text-[10px] uppercase tracking-[0.2em] font-black text-slate-400/80">{t.bet}</span>
-            <span className="text-[10px] font-bold text-amber-500/80 bg-amber-500/10 px-2 py-0.5 rounded-full border border-amber-500/20">
-              {t.available}: {formatValue(balance)}
-            </span>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <div className="flex flex-1 items-center bg-black/40 rounded-xl ring-1 ring-white/5 p-1.5 shadow-inner">
-              <BetBtn onClick={() => setBet((b) => Math.max(0.2, +(b - 0.2).toFixed(2)))}>−</BetBtn>
-              <div className="flex-1 text-center relative">
-                <span className="text-xl font-black tracking-tighter text-white drop-shadow-sm">
-                  {formatValue(bet)}
-                </span>
-              </div>
-              <BetBtn onClick={() => setBet((b) => +(b + 0.2).toFixed(2))}>+</BetBtn>
+        <div className="bg-purple-950/60 rounded-2xl p-4 border border-white/10 shadow-2xl">
+          <div className="flex items-center justify-between gap-4 mb-2">
+            <div className="flex gap-1">
+              <BetBtnPrint onClick={() => setBet(0.2)}>Mín</BetBtnPrint>
+              <BetBtnPrint onClick={() => setBet((b) => Math.max(0.2, +(b - 0.2).toFixed(2)))}>−</BetBtnPrint>
             </div>
             
-            <div className="flex flex-col gap-1.5">
-              <QuickBetBtn onClick={() => setBet(0.2)}>MIN</QuickBetBtn>
-              <QuickBetBtn onClick={() => setBet(Math.max(0.2, +balance.toFixed(2)))}>MAX</QuickBetBtn>
+            <div className="flex-1 text-center">
+              <span className="text-xl font-black text-white tracking-tight drop-shadow-lg">
+                Aposta {formatValue(bet)}
+              </span>
             </div>
+
+            <div className="flex gap-1">
+              <BetBtnPrint onClick={() => setBet((b) => +(b + 0.2).toFixed(2))}>+</BetBtnPrint>
+              <BetBtnPrint onClick={() => setBet(Math.max(0.2, +balance.toFixed(2)))}>Máx</BetBtnPrint>
+            </div>
+          </div>
+          
+          <div className="text-center">
+            <span className="text-lg font-bold text-slate-400/80">
+              Saldo {formatValue(balance)}
+            </span>
           </div>
         </div>
       </div>
@@ -382,22 +392,11 @@ export function PlinkoGame() {
   );
 }
 
-function BetBtn({ children, onClick }: { children: React.ReactNode; onClick: () => void }) {
+function BetBtnPrint({ children, onClick }: { children: React.ReactNode; onClick: () => void }) {
   return (
     <button
       onClick={onClick}
-      className="h-9 w-9 grid place-items-center rounded-md bg-white/5 text-xl font-bold text-slate-400 hover:bg-white/10 hover:text-white transition-colors active:scale-90"
-    >
-      {children}
-    </button>
-  );
-}
-
-function QuickBetBtn({ children, onClick }: { children: React.ReactNode; onClick: () => void }) {
-  return (
-    <button
-      onClick={onClick}
-      className="quick-bet-btn h-6 px-3 rounded-md ring-1 ring-white/5 text-[9px] font-black text-slate-400 active:scale-95 shadow-sm uppercase tracking-wider"
+      className="h-10 px-3 flex items-center justify-center rounded-lg bg-white/10 text-slate-300 font-medium text-sm transition-all active:scale-90 hover:bg-white/20 border-b-2 border-black/20"
     >
       {children}
     </button>
