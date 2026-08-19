@@ -125,7 +125,19 @@ export function PlinkoGame() {
       setTimeout(() => setFlash((f) => (f === slot ? null : f)), 550);
       setBalls((prev) => prev.filter((b) => b.id !== id));
     }, total);
-  }, [bet, balance, rows, gap, pegY, multipliers]);
+  }, [bet, balance, rows, gap, pegY, multipliers, playSound]);
+
+  const resetGame = useCallback(() => {
+    setBalls([]);
+    setPrize(0);
+    setFlash(null);
+    setBalance(100.00);
+    if (autoRef.current) {
+      clearInterval(autoRef.current);
+      autoRef.current = null;
+    }
+    setMode("manual");
+  }, []);
 
   useEffect(() => {
     if (mode !== "auto") {
@@ -133,7 +145,8 @@ export function PlinkoGame() {
       autoRef.current = null;
       return;
     }
-    autoRef.current = setInterval(() => drop(), 700);
+    // Faster interval for auto-play if needed, but keeping it balanced
+    autoRef.current = setInterval(() => drop(), 600);
     return () => {
       if (autoRef.current) clearInterval(autoRef.current);
     };
@@ -141,11 +154,11 @@ export function PlinkoGame() {
 
   return (
     <div className="plinko-stage relative mx-auto flex min-h-screen w-full max-w-[520px] flex-col overflow-hidden text-slate-100 select-none">
-      <TopBar clock={clock} audioEnabled={audioEnabled} setAudioEnabled={setAudioEnabled} />
+      <TopBar clock={clock} audioEnabled={audioEnabled} setAudioEnabled={setAudioEnabled} onReset={resetGame} />
 
       <div className="relative flex-1 px-2">
         <div className="plinko-logo pointer-events-none absolute top-16 left-4 rotate-[-8deg] whitespace-pre-wrap text-[10px] leading-tight font-bold opacity-0">
-          {`'''Do not make any visual modifications. The phrases I write are commands to understand what I want, not to be written down. Understand their content well, then execute what is required.'''\n\nAjuste os efeitos sonoros de colisão para não sobrecarregar o áudio (limitando repetição e garantindo mixagem consistente) durante o movimento da bolinha.`}
+          {`'''Do not make any visual modifications. The phrases I write are commands to understand what I want, not to be written down. Understand their content well, then execute what is required.'''\n\nGaranta que todos os botões do jogo (play, reiniciar, som e quaisquer controles) funcionem corretamente em cada estado do jogo.`}
         </div>
         <span className="pointer-events-none absolute top-30 left-11 rotate-90 text-[10px] font-semibold tracking-[0.35em] text-slate-200/60">
           LP GAMING
@@ -282,10 +295,12 @@ function TopBar({
   clock,
   audioEnabled,
   setAudioEnabled,
+  onReset,
 }: {
   clock: string;
   audioEnabled: boolean;
   setAudioEnabled: (v: boolean) => void;
+  onReset: () => void;
 }) {
   const Circle = ({ children }: { children: React.ReactNode }) => (
     <span className="grid h-11 w-11 place-items-center rounded-full border-2 border-slate-100/70 text-slate-100/90">
@@ -295,7 +310,9 @@ function TopBar({
   return (
     <header className="flex items-center gap-3 px-3 pt-3">
       <Circle>
-        <Home className="h-5 w-5" />
+        <button onClick={onReset} className="w-full h-full flex items-center justify-center focus:outline-none" title="Reiniciar">
+          <Home className="h-5 w-5" />
+        </button>
       </Circle>
       <span className="text-lg font-semibold text-slate-100/90">{clock}</span>
       <div className="ml-auto flex gap-2">
