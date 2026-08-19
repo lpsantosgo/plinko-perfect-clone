@@ -1,7 +1,19 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Home, Volume2, HelpCircle, Timer, Award, ChevronLeft } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { formatBRL, getMultipliers, slotTone, type Risk } from "@/lib/plinko";
+import { formatBRL, getMultipliers, type Risk } from "@/lib/plinko";
+
+const SLOT_CLASSES = ["bg-slot-1", "bg-slot-2", "bg-slot-3", "bg-slot-4", "bg-slot-5"];
+
+function slotClass(index: number, total: number) {
+  const mid = (total - 1) / 2;
+  const d = mid === 0 ? 0 : Math.abs(index - mid) / mid;
+  if (d > 0.85) return SLOT_CLASSES[0];
+  if (d > 0.6) return SLOT_CLASSES[1];
+  if (d > 0.38) return SLOT_CLASSES[2];
+  if (d > 0.15) return SLOT_CLASSES[3];
+  return SLOT_CLASSES[4];
+}
 
 type Ball = { id: number; path: { x: number; y: number }[]; start: number; slot: number };
 
@@ -120,7 +132,7 @@ export function PlinkoGame() {
             key={i}
             className={cn(
               "rounded-sm py-1 text-center text-[11px] font-bold text-slate-900 transition-transform",
-              `bg-${slotTone(i, multipliers.length)}`,
+              slotClass(i, multipliers.length),
               flash === i && "-translate-y-1 scale-105",
             )}
           >
