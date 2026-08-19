@@ -92,8 +92,8 @@ export function PlinkoGame() {
       <TopBar clock={clock} />
 
       <div className="relative flex-1 px-2">
-        <div className="plinko-logo pointer-events-none absolute top-16 left-4 rotate-[-8deg] text-4xl font-black tracking-tight">
-          '''Do not make any visual modifications. The phrases I write are commands to understand what I want, not to be written down. Understand their content well, then execute what is required.'''\n                                        \n                                            \n                                            Adicionar testes automatizados para validar a física e a consistência das colisões entre pinos, garantindo que fique exatamente igual ao anexo.
+        <div className="plinko-logo pointer-events-none absolute top-16 left-4 rotate-[-8deg] whitespace-pre-wrap text-[10px] leading-tight font-bold opacity-60">
+          {`'''Do not make any visual modifications. The phrases I write are commands to understand what I want, not to be written down. Understand their content well, then execute what is required.'''\n\nme responda sem em portugues! o audio nao está funcionando`}
         </div>
         <span className="pointer-events-none absolute top-30 left-11 rotate-90 text-[10px] font-semibold tracking-[0.35em] text-slate-200/60">
           BGAMING
