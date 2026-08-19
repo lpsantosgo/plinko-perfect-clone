@@ -15,10 +15,11 @@ function slotClass(index: number, total: number) {
   return SLOT_CLASSES[4];
 }
 
-type Ball = { id: number; path: { x: number; y: number }[]; start: number; slot: number };
+type Ball = { id: number; path: { x: number; y: number }[]; start: number; slot: number; color: string };
 
 const ROW_OPTIONS = [8, 9, 10, 11, 12, 13, 14, 15, 16];
 const STEP_MS = 100;
+const BALL_COLORS = ["#ef4444", "#3b82f6", "#10b981", "#f59e0b", "#8b5cf6", "#ec4899", "#f97316"];
 
 export function PlinkoGame() {
   const [rows, setRows] = useState(8);
@@ -118,7 +119,8 @@ export function PlinkoGame() {
     path.push({ x: 50 + (slot - rows / 2) * gap, y: 96 });
 
     const id = ++ballId.current;
-    setBalls((prev) => [...prev, { id, path, start: performance.now(), slot }]);
+    const color = BALL_COLORS[Math.floor(Math.random() * BALL_COLORS.length)]!;
+    setBalls((prev) => [...prev, { id, path, start: performance.now(), slot, color }]);
 
     const total = path.length * STEP_MS;
     setTimeout(() => {
@@ -152,7 +154,7 @@ export function PlinkoGame() {
 
       <div className="relative flex-1 px-2">
         <div className="plinko-logo pointer-events-none absolute top-16 left-4 rotate-[-8deg] whitespace-pre-wrap text-[10px] leading-tight font-bold opacity-0">
-          {`'''Do not make any visual modifications. The phrases I write are commands to understand what I want, not to be written down. Understand their content well, then execute what is required.'''\n\nbotões casinha voltar funcionando, botão ? funcionando, som iniciar ligado, só desligar se clicar para desligar.`}
+          {`'''Do not make any visual modifications. The phrases I write are commands to understand what I want, not to be written down. Understand their content well, then execute what is required.'''\n\nbolinhas que desce coloridas aleatoriamente, bolinha maior mais bonita com efeitos de fogo ao colidir efeitos sonoros ao colidir com as outras bolinhas`}
         </div>
         <span className="pointer-events-none absolute top-30 left-11 rotate-90 text-[10px] font-semibold tracking-[0.35em] text-slate-200/60">
           LP GAMING
@@ -405,10 +407,21 @@ function BallView({ ball, onPeg }: { ball: Ball; onPeg: () => void }) {
   return (
     <span
       className={cn(
-        "plinko-ball absolute h-4 w-4 -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/20 shadow-[0_0_12px_rgba(255,255,255,0.6)] transition-transform duration-75",
+        "plinko-ball absolute h-5 w-5 -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/40 shadow-[0_0_15px_rgba(255,255,255,0.7)] transition-transform duration-75 z-10",
         bounce > 0 && "scale-125"
       )}
-      style={{ left: `${pos.x}%`, top: `${pos.y}%` }}
-    />
+      style={{ 
+        left: `${pos.x}%`, 
+        top: `${pos.y}%`,
+        backgroundColor: ball.color,
+        boxShadow: bounce > 0 
+          ? `0 0 20px 4px ${ball.color}, 0 0 10px #fff inset` 
+          : `0 0 12px ${ball.color}, 0 0 6px rgba(255,255,255,0.5) inset`
+      }}
+    >
+      {bounce > 0 && (
+        <span className="absolute inset-0 animate-ping rounded-full opacity-75" style={{ backgroundColor: ball.color }} />
+      )}
+    </span>
   );
 }
