@@ -51,6 +51,9 @@ export function slotTone(index: number, total: number): string {
   return "slot-5";
 }
 
-export function formatBRL(v: number): string {
-  return v.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+export function formatCurrency(v: number, locale: string = "pt-BR", currency: string = "BRL"): string {
+  return v.toLocaleString(locale, { 
+    minimumFractionDigits: 2, 
+    maximumFractionDigits: 2 
+  });
 }
