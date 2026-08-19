@@ -274,7 +274,7 @@ export function PlinkoGame() {
             <div className="flex items-center gap-2">
               <div className="flex flex-1 items-center bg-slate-900/60 rounded-lg ring-1 ring-white/10 p-1">
                 <BetBtn onClick={() => setBet((b) => Math.max(0.2, +(b - 0.2).toFixed(2)))}>−</BetBtn>
-                <span className="flex-1 text-center text-lg font-black tracking-tighter text-white">
+                <span className="flex-1 text-center text-lg font-black tracking-tighter text-white/90">
                   {formatBRL(bet)}
                 </span>
                 <BetBtn onClick={() => setBet((b) => +(b + 0.2).toFixed(2))}>+</BetBtn>
