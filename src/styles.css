@@ -4,6 +4,20 @@
 
 @custom-variant dark (&:is(.dark *));
 
+@theme {
+  --color-slot-1: oklch(0.72 0.18 45);
+  --color-slot-2: oklch(0.86 0.18 95);
+  --color-slot-3: oklch(0.87 0.2 120);
+  --color-slot-4: oklch(0.82 0.21 140);
+  --color-slot-5: oklch(0.78 0.2 152);
+  --color-gold: oklch(0.83 0.16 82);
+  --color-gold-deep: oklch(0.68 0.16 62);
+  --color-panel: oklch(0.36 0.13 300);
+  --color-panel-soft: oklch(0.45 0.13 300);
+  --color-board-top: oklch(0.42 0.11 245);
+  --color-board-bottom: oklch(0.32 0.13 295);
+}
+
 /*
  * Design system definition.
  *
@@ -140,5 +154,60 @@
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
+  }
+}
+
+@layer components {
+  .plinko-stage {
+    background:
+      radial-gradient(120% 60% at 50% 0%, oklch(0.5 0.1 235) 0%, transparent 60%),
+      linear-gradient(
+        180deg,
+        oklch(0.44 0.1 240) 0%,
+        oklch(0.38 0.12 262) 45%,
+        oklch(0.33 0.13 292) 100%
+      );
+  }
+
+  .plinko-controls {
+    background: linear-gradient(180deg, oklch(0.33 0.13 295) 0%, oklch(0.28 0.12 300) 100%);
+  }
+
+  .plinko-peg {
+    background: radial-gradient(circle at 32% 28%, oklch(1 0 0) 0%, oklch(0.86 0.02 250) 70%);
+    box-shadow: 0 0 6px oklch(0.95 0.02 240 / 0.55);
+  }
+
+  .plinko-ball {
+    background: radial-gradient(circle at 32% 28%, oklch(0.98 0.05 20), oklch(0.68 0.25 5));
+    box-shadow: 0 0 10px oklch(0.75 0.25 10 / 0.85);
+  }
+
+  .plinko-prize {
+    background: linear-gradient(
+      180deg,
+      oklch(0.86 0.17 78) 0%,
+      oklch(0.74 0.19 55) 55%,
+      oklch(0.62 0.18 45) 100%
+    );
+    box-shadow:
+      inset 0 0 12px oklch(0.98 0.1 90 / 0.7),
+      0 4px 14px oklch(0.2 0.08 290 / 0.6);
+  }
+
+  .plinko-play {
+    background: radial-gradient(circle at 38% 30%, oklch(1 0 0) 0%, oklch(0.9 0.02 250) 78%);
+    box-shadow:
+      0 0 0 8px oklch(0.78 0.17 70),
+      0 0 0 12px oklch(0.55 0.15 55),
+      0 10px 26px oklch(0.2 0.08 290 / 0.7);
+  }
+
+  .plinko-logo {
+    background: linear-gradient(180deg, oklch(0.95 0.15 100) 0%, oklch(0.78 0.19 62) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    text-shadow: 0 2px 0 oklch(0.45 0.12 40 / 0.35);
   }
 }
