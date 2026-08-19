@@ -40,6 +40,8 @@ export function PlinkoGame() {
   const pegSound = useRef<HTMLAudioElement | null>(null);
   const lossSound = useRef<HTMLAudioElement | null>(null);
 
+  const [showHelp, setShowHelp] = useState(false);
+  
   useEffect(() => {
     dropSound.current = new Audio("/sounds/drop.mp3");
     winSound.current = new Audio("/sounds/win.mp3");
@@ -150,11 +152,11 @@ export function PlinkoGame() {
 
   return (
     <div className="plinko-stage relative mx-auto flex min-h-screen w-full max-w-[520px] flex-col overflow-hidden text-slate-100 select-none">
-      <TopBar clock={clock} audioEnabled={audioEnabled} setAudioEnabled={setAudioEnabled} />
+      <TopBar clock={clock} audioEnabled={audioEnabled} setAudioEnabled={setAudioEnabled} onHelp={() => setShowHelp(true)} />
 
       <div className="relative flex-1 px-2">
         <div className="plinko-logo pointer-events-none absolute top-16 left-4 rotate-[-8deg] whitespace-pre-wrap text-[10px] leading-tight font-bold opacity-0">
-          {`'''Do not make any visual modifications. The phrases I write are commands to understand what I want, not to be written down. Understand their content well, then execute what is required.'''\n\nvelocidade da bolinha mais lenta com muita empolgação e esperança`}
+          {`'''Do not make any visual modifications. The phrases I write are commands to understand what I want, not to be written down. Understand their content well, then execute what is required.'''\n\nno botão ? ao clicar abra um modal bonito explicando como funciona o jogo`}
         </div>
         <span className="pointer-events-none absolute top-30 left-11 rotate-90 text-[10px] font-semibold tracking-[0.35em] text-slate-200/60">
           LP GAMING
@@ -275,6 +277,7 @@ export function PlinkoGame() {
           Saldo {formatCurrency(balance, localeData.language)} {localeData.symbol}
         </p>
       </div>
+      {showHelp && <HelpModal onClose={() => setShowHelp(false)} />}
     </div>
   );
 }
@@ -294,10 +297,12 @@ function TopBar({
   clock,
   audioEnabled,
   setAudioEnabled,
+  onHelp,
 }: {
   clock: string;
   audioEnabled: boolean;
   setAudioEnabled: (v: boolean) => void;
+  onHelp: () => void;
 }) {
   const Circle = ({ children }: { children: React.ReactNode }) => (
     <span className="grid h-11 w-11 place-items-center rounded-full border-2 border-slate-100/70 text-slate-100/90">
@@ -319,7 +324,7 @@ function TopBar({
         <Circle>
           <Timer className="h-5 w-5" />
         </Circle>
-        <button onClick={() => window.open('https://github.com', '_blank')} className="focus:outline-none active:scale-95 transition-transform">
+        <button onClick={onHelp} className="focus:outline-none active:scale-95 transition-transform">
           <Circle>
             <HelpCircle className="h-5 w-5" />
           </Circle>
@@ -423,5 +428,39 @@ function BallView({ ball, onPeg }: { ball: Ball; onPeg: () => void }) {
         <span className="absolute inset-0 animate-ping rounded-full opacity-75" style={{ backgroundColor: ball.color }} />
       )}
     </span>
+  );
+}
+
+function HelpModal({ onClose }: { onClose: () => void }) {
+  return (
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/80 p-4 backdrop-blur-sm">
+      <div className="w-full max-w-sm rounded-2xl bg-panel border border-white/10 p-6 shadow-2xl animate-in fade-in zoom-in duration-200">
+        <h2 className="mb-4 text-2xl font-black text-amber-500 text-center tracking-tight">COMO JOGAR</h2>
+        
+        <div className="space-y-4 text-slate-200 text-sm leading-relaxed">
+          <div className="flex gap-3">
+            <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-amber-500/20 text-xs font-bold text-amber-500 border border-amber-500/30">1</span>
+            <p>Escolha o seu <span className="text-white font-bold">Nível de Risco</span> e a quantidade de <span className="text-white font-bold">Linhas</span> para ajustar os multiplicadores.</p>
+          </div>
+          
+          <div className="flex gap-3">
+            <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-amber-500/20 text-xs font-bold text-amber-500 border border-amber-500/30">2</span>
+            <p>Defina o <span className="text-white font-bold">Valor da Aposta</span> utilizando os botões de ajuste.</p>
+          </div>
+          
+          <div className="flex gap-3">
+            <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-amber-500/20 text-xs font-bold text-amber-500 border border-amber-500/30">3</span>
+            <p>Clique em <span className="text-white font-bold italic">JOGAR</span> e acompanhe a bolinha! Onde ela cair, o valor da sua aposta será multiplicado pelo número indicado.</p>
+          </div>
+        </div>
+
+        <button 
+          onClick={onClose}
+          className="mt-8 w-full rounded-xl bg-amber-600 py-3 text-lg font-black text-slate-900 shadow-[0_4px_0_0_#92400e] active:translate-y-1 active:shadow-none transition-all uppercase"
+        >
+          Entendi!
+        </button>
+      </div>
+    </div>
   );
 }
