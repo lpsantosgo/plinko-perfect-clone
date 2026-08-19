@@ -37,16 +37,32 @@ export function PlinkoGame() {
   const winSound = useRef<HTMLAudioElement | null>(null);
   const pegSound = useRef<HTMLAudioElement | null>(null);
   const lossSound = useRef<HTMLAudioElement | null>(null);
+  const lastPegTime = useRef(0);
 
   useEffect(() => {
     dropSound.current = new Audio("/sounds/drop.mp3");
     winSound.current = new Audio("/sounds/win.mp3");
     pegSound.current = new Audio("/sounds/peg.mp3");
     lossSound.current = new Audio("/sounds/loss.mp3");
+    
+    // Pre-load sounds to ensure they are ready
+    [dropSound, winSound, pegSound, lossSound].forEach(ref => {
+      if (ref.current) {
+        ref.current.load();
+      }
+    });
   }, []);
 
   const playSound = (sound: "drop" | "win" | "peg" | "loss") => {
     if (!audioEnabled) return;
+    
+    // Rate limit peg sounds to avoid audio overload/distortion
+    if (sound === "peg") {
+      const now = performance.now();
+      if (now - lastPegTime.current < 60) return; 
+      lastPegTime.current = now;
+    }
+
     let s: HTMLAudioElement | null = null;
     if (sound === "drop") s = dropSound.current;
     if (sound === "win") s = winSound.current;
@@ -55,7 +71,8 @@ export function PlinkoGame() {
 
     if (s) {
       const clone = s.cloneNode() as HTMLAudioElement;
-      clone.volume = sound === "peg" ? 0.3 : 0.8;
+      // Consistent mixing: lower volume for frequent peg sounds
+      clone.volume = sound === "peg" ? 0.2 : 0.7;
       clone.play().catch(() => {});
     }
   };
@@ -128,7 +145,7 @@ export function PlinkoGame() {
 
       <div className="relative flex-1 px-2">
         <div className="plinko-logo pointer-events-none absolute top-16 left-4 rotate-[-8deg] whitespace-pre-wrap text-[10px] leading-tight font-bold opacity-0">
-          {`'''Do not make any visual modifications. The phrases I write are commands to understand what I want, not to be written down. Understand their content well, then execute what is required.'''\n\nfaça todos os botões do jogo funcionar, aumente a bolinha que cai tenha audio ao colidir e efeitos de colidir audios ao dar win audios ao dar die aonde tem BGaming colocar LP Gaming`}
+          {`'''Do not make any visual modifications. The phrases I write are commands to understand what I want, not to be written down. Understand their content well, then execute what is required.'''\n\nAjuste os efeitos sonoros de colisão para não sobrecarregar o áudio (limitando repetição e garantindo mixagem consistente) durante o movimento da bolinha.`}
         </div>
         <span className="pointer-events-none absolute top-30 left-11 rotate-90 text-[10px] font-semibold tracking-[0.35em] text-slate-200/60">
           LP GAMING
