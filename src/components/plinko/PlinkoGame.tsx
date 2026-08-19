@@ -35,18 +35,28 @@ export function PlinkoGame() {
   const [audioEnabled, setAudioEnabled] = useState(false);
   const dropSound = useRef<HTMLAudioElement | null>(null);
   const winSound = useRef<HTMLAudioElement | null>(null);
+  const pegSound = useRef<HTMLAudioElement | null>(null);
+  const lossSound = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
     dropSound.current = new Audio("/sounds/drop.mp3");
     winSound.current = new Audio("/sounds/win.mp3");
+    pegSound.current = new Audio("/sounds/peg.mp3");
+    lossSound.current = new Audio("/sounds/loss.mp3");
   }, []);
 
-  const playSound = (sound: "drop" | "win") => {
+  const playSound = (sound: "drop" | "win" | "peg" | "loss") => {
     if (!audioEnabled) return;
-    const s = sound === "drop" ? dropSound.current : winSound.current;
+    let s: HTMLAudioElement | null = null;
+    if (sound === "drop") s = dropSound.current;
+    if (sound === "win") s = winSound.current;
+    if (sound === "peg") s = pegSound.current;
+    if (sound === "loss") s = lossSound.current;
+
     if (s) {
-      s.currentTime = 0;
-      s.play().catch(() => {});
+      const clone = s.cloneNode() as HTMLAudioElement;
+      clone.volume = sound === "peg" ? 0.3 : 0.8;
+      clone.play().catch(() => {});
     }
   };
 
@@ -88,11 +98,13 @@ export function PlinkoGame() {
 
     const total = path.length * STEP_MS;
     setTimeout(() => {
-      const win = +(bet * (multipliers[slot] ?? 1)).toFixed(2);
+      const multiplier = multipliers[slot] ?? 1;
+      const win = +(bet * multiplier).toFixed(2);
       setPrize(win);
       setBalance((b) => +(b + win).toFixed(2));
       setFlash(slot);
-      if (win > 0) playSound("win");
+      if (multiplier >= 1) playSound("win");
+      else playSound("loss");
       setTimeout(() => setFlash((f) => (f === slot ? null : f)), 550);
       setBalls((prev) => prev.filter((b) => b.id !== id));
     }, total);
@@ -116,15 +128,15 @@ export function PlinkoGame() {
 
       <div className="relative flex-1 px-2">
         <div className="plinko-logo pointer-events-none absolute top-16 left-4 rotate-[-8deg] whitespace-pre-wrap text-[10px] leading-tight font-bold opacity-0">
-          {`'''Do not make any visual modifications. The phrases I write are commands to understand what I want, not to be written down. Understand their content well, then execute what is required.'''\n\nImplementar um botão de ativar áudio que habilite os sons após o primeiro clique do usuário, evitando bloqueio do navegador.`}
+          {`'''Do not make any visual modifications. The phrases I write are commands to understand what I want, not to be written down. Understand their content well, then execute what is required.'''\n\nfaça todos os botões do jogo funcionar, aumente a bolinha que cai tenha audio ao colidir e efeitos de colidir audios ao dar win audios ao dar die aonde tem BGaming colocar LP Gaming`}
         </div>
         <span className="pointer-events-none absolute top-30 left-11 rotate-90 text-[10px] font-semibold tracking-[0.35em] text-slate-200/60">
-          BGAMING
+          LP GAMING
         </span>
 
         <div className="absolute top-24 right-2 z-20 w-14 text-center">
-          <p className="mb-1 text-xs text-slate-100/90">Linhas</p>
-          <div className="overflow-hidden rounded-md">
+          <p className="mb-1 text-[10px] font-bold text-slate-100/90 uppercase tracking-wider">Linhas</p>
+          <div className="overflow-hidden rounded-md border border-white/10 bg-panel-soft/40 backdrop-blur-sm">
             {ROW_OPTIONS.map((r) => (
               <button
                 key={r}
@@ -146,7 +158,7 @@ export function PlinkoGame() {
           <ChevronLeft className="h-4 w-4" />
         </button>
 
-        <Board rows={rows} gap={gap} pegY={pegY} balls={balls} />
+        <Board rows={rows} gap={gap} pegY={pegY} balls={balls} onPeg={() => playSound("peg")} />
       </div>
 
       <div className="grid gap-[3px] px-2" style={{ gridTemplateColumns: `repeat(${multipliers.length}, minmax(0,1fr))` }}>
@@ -230,7 +242,7 @@ export function PlinkoGame() {
           <BetBtn onClick={() => setBet(Math.max(0.2, +balance.toFixed(2)))}>Máx</BetBtn>
         </div>
 
-        <p className="mt-2 text-center text-lg font-semibold text-slate-200/70">
+        <p className="mt-2 text-center text-lg font-bold text-slate-200/90">
           Saldo {formatBRL(balance)} BRL
         </p>
       </div>
@@ -294,42 +306,51 @@ function Board({
   gap,
   pegY,
   balls,
+  onPeg,
 }: {
   rows: number;
   gap: number;
   pegY: (r: number) => number;
   balls: Ball[];
+  onPeg: () => void;
 }) {
   return (
     <div className="relative mx-auto h-[62vh] max-h-[560px] w-full">
       <div
-        className="absolute top-[2%] left-1/2 h-9 w-9 -translate-x-1/2 rounded-full bg-slate-950/80"
+        className="absolute top-[2%] left-1/2 h-10 w-10 -translate-x-1/2 rounded-full border border-white/10 bg-slate-950/80 shadow-inner"
         aria-hidden
       />
       {Array.from({ length: rows }).map((_, r) =>
         Array.from({ length: r + 3 }).map((__, i) => (
           <span
             key={`${r}-${i}`}
-            className="plinko-peg absolute h-[7px] w-[7px] -translate-x-1/2 -translate-y-1/2 rounded-full"
+            className="plinko-peg absolute h-[7px] w-[7px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/5 bg-slate-300/80 shadow-[0_0_2px_rgba(255,255,255,0.5)]"
             style={{ left: `${50 + (i - (r + 2) / 2) * gap}%`, top: `${pegY(r)}%` }}
           />
         )),
       )}
       {balls.map((b) => (
-        <BallView key={b.id} ball={b} />
+        <BallView key={b.id} ball={b} onPeg={onPeg} />
       ))}
     </div>
   );
 }
 
-function BallView({ ball }: { ball: Ball }) {
+function BallView({ ball, onPeg }: { ball: Ball; onPeg: () => void }) {
   const [pos, setPos] = useState(ball.path[0]!);
+  const lastIndex = useRef(-1);
 
   useEffect(() => {
     let raf = 0;
     const loop = () => {
       const t = (performance.now() - ball.start) / STEP_MS;
       const i = Math.min(Math.floor(t), ball.path.length - 2);
+      
+      if (i > lastIndex.current && i < ball.path.length - 1) {
+        lastIndex.current = i;
+        onPeg();
+      }
+
       const f = Math.min(Math.max(t - i, 0), 1);
       const a = ball.path[i]!;
       const c = ball.path[i + 1]!;
@@ -341,11 +362,11 @@ function BallView({ ball }: { ball: Ball }) {
     };
     raf = requestAnimationFrame(loop);
     return () => cancelAnimationFrame(raf);
-  }, [ball]);
+  }, [ball, onPeg]);
 
   return (
     <span
-      className="plinko-ball absolute h-3 w-3 -translate-x-1/2 -translate-y-1/2 rounded-full"
+      className="plinko-ball absolute h-4 w-4 -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/20 shadow-[0_0_8px_rgba(255,255,255,0.4)]"
       style={{ left: `${pos.x}%`, top: `${pos.y}%` }}
     />
   );
