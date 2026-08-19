@@ -394,7 +394,16 @@ function Board({
         <CollisionEffect key={e.id} x={e.x} y={e.y} />
       ))}
       {balls.map((b) => (
-        <BallView key={b.id} ball={b} onPeg={() => handlePeg(b.path[Math.floor((performance.now() - b.start) / STEP_MS) + 1]?.x || 50, pegY(Math.floor((performance.now() - b.start) / STEP_MS)))} />
+        <BallView 
+          key={b.id} 
+          ball={b} 
+          onPeg={() => {
+            const index = Math.floor((performance.now() - b.start) / STEP_MS);
+            const x = b.path[index + 1]?.x || 50;
+            const y = pegY(index);
+            handlePeg(x, y);
+          }} 
+        />
       ))}
     </div>
   );
